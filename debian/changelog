@@ -1,0 +1,11 @@
+capi-media-recorder (0.1.0-4) unstable; urgency=low
+
+  * Update version
+
+ -- Seungkeun Lee <sngn.lee@samsung.com>  Thu, 15 Dec 2011 12:54:39 +0900
+
+capi-media-recorder (0.0.1-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Seungkeun Lee <sngn.lee@samsung.com>  Thu, 08 Dec 2011 08:57:45 +0900
