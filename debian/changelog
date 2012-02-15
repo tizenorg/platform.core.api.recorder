@@ -1,3 +1,11 @@
+capi-media-recorder (0.1.0-5) unstable; urgency=low
+
+  * add so version
+  * Git: slp-source.sec.samsung.net:slp/api/recorder
+  * Tag: capi-media-recorder_0.1.0-5
+
+ -- Seungkeun Lee <sngn.lee@samsung.com>  Tue, 14 Feb 2012 16:51:44 +0900
+
 capi-media-recorder (0.1.0-4) unstable; urgency=low
 
   * Update version
