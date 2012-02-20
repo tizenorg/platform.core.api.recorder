@@ -679,7 +679,7 @@ int recorder_attr_set_size_limit(recorder_h recorder,  int kbyte){
 	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
-	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_TARGET_MAX_SIZE  , kbyte, NULL);
+	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, "target-max-size"  , kbyte, NULL);
 	return _convert_recorder_error_code(__func__, ret);
 	
 }
