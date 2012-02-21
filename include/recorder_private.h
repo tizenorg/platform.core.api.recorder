@@ -49,8 +49,6 @@ typedef struct _recorder_s{
 
 } recorder_s;
 
-int mm_recorder_msg_cb(int message, void *param, void *user_data);
-
 #ifdef __cplusplus
 }
 #endif

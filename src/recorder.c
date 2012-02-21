@@ -33,11 +33,12 @@
 #endif
 #define LOG_TAG "TIZEN_N_RECORDER"
 
+
 /*
  *	camera_private
  * It should be sync with camera_private.h
 */
-int mm_message_callback(int message, void *param, void *user_data);
+int __mm_camera_message_callback(int message, void *param, void *user_data);
 
 typedef enum {
 	_CAMERA_EVENT_TYPE_STATE_CHANGE,
@@ -54,16 +55,22 @@ typedef struct _camera_s{
 	
 	void* user_cb[_CAMERA_EVENT_TYPE_NUM];
 	void* user_data[_CAMERA_EVENT_TYPE_NUM];
-	unsigned long display_handle;
+	void* display_handle;
+	camera_display_type_e display_type;
 	int state;
 	
 } camera_s;
+
 /*
  * end of camera_private
  */
 
 
-int _convert_recorder_error_code(const char *func, int code){
+static int __mm_recorder_msg_cb(int message, void *param, void *user_data);
+
+
+
+static int __convert_recorder_error_code(const char *func, int code){
 	int ret = RECORDER_ERROR_INVALID_OPERATION;
 	char *errorstr = NULL;
 	
@@ -153,7 +160,7 @@ int _convert_recorder_error_code(const char *func, int code){
 	return ret;
 }
 
-recorder_state_e _recorder_state_convert(MMCamcorderStateType mm_state )
+static recorder_state_e __recorder_state_convert(MMCamcorderStateType mm_state )
 {
 	recorder_state_e state = RECORDER_STATE_NONE;
 	switch( mm_state ){
@@ -183,7 +190,7 @@ recorder_state_e _recorder_state_convert(MMCamcorderStateType mm_state )
 	return state;
 }
 
-int mm_recorder_msg_cb(int message, void *param, void *user_data){
+static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 
 	recorder_s * handle = (recorder_s*)user_data;
 	MMMessageParamType *m = (MMMessageParamType*)param;
@@ -193,7 +200,7 @@ int mm_recorder_msg_cb(int message, void *param, void *user_data){
 		case MM_MESSAGE_CAMCORDER_STATE_CHANGED:
 		case MM_MESSAGE_CAMCORDER_STATE_CHANGED_BY_ASM:
 				previous_state = handle->state;
-				handle->state = _recorder_state_convert(m->state.current);
+				handle->state = __recorder_state_convert(m->state.current);
 				
 				if( previous_state != handle->state && handle->user_cb[_RECORDER_EVENT_TYPE_STATE_CHANGE] ){
 					((recorder_state_changed_cb)handle->user_cb[_RECORDER_EVENT_TYPE_STATE_CHANGE])(previous_state, handle->state, message == MM_MESSAGE_CAMCORDER_STATE_CHANGED ? 0 : 1 , handle->user_data[_RECORDER_EVENT_TYPE_STATE_CHANGE]);
@@ -256,8 +263,8 @@ int mm_recorder_msg_cb(int message, void *param, void *user_data){
 
 int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){
 	
-	if( camera == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( camera == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 
  	int ret;
 	recorder_s * handle;
@@ -282,9 +289,9 @@ int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){
 	handle->camera = camera;
 	handle->state = RECORDER_STATE_CREATED;
 
-	mm_camcorder_set_message_callback(handle->mm_handle, mm_recorder_msg_cb, (void*)handle);
+	mm_camcorder_set_message_callback(handle->mm_handle, __mm_recorder_msg_cb, (void*)handle);
 
-	//((camera_s*)camera)->relay_callback = mm_recorder_msg_cb;
+	//((camera_s*)camera)->relay_callback = __mm_recorder_msg_cb;
 	//((camera_s*)camera)->relay_user_data = handle;
 	handle->type = _RECORDER_TYPE_VIDEO;
 	*recorder = (recorder_h)handle;
@@ -299,13 +306,13 @@ int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){
 																MMCAM_MODE , MM_CAMCORDER_MODE_VIDEO, 
 																MMCAM_CAMERA_FORMAT, preview_format,
 																(void*)NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_create_audiorecorder( recorder_h* recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 	
  	int ret;
 	recorder_s * handle;
@@ -324,7 +331,7 @@ int recorder_create_audiorecorder( recorder_h* recorder){
 	if( ret != MM_ERROR_NONE){
 		free(handle);
 		LOGE("[%s] mm_camcorder_create fail", __func__);
-		return _convert_recorder_error_code(__func__, ret);
+		return __convert_recorder_error_code(__func__, ret);
 	}
 	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL, 
 																MMCAM_MODE , MM_CAMCORDER_MODE_AUDIO, 
@@ -334,12 +341,12 @@ int recorder_create_audiorecorder( recorder_h* recorder){
 		mm_camcorder_destroy(handle->mm_handle);
 		free(handle);
 		LOGE("[%s] AUDIO mode setting fail", __func__);
-		return _convert_recorder_error_code(__func__, ret);
+		return __convert_recorder_error_code(__func__, ret);
 	}
 
 
 	handle->state = RECORDER_STATE_CREATED;
-	mm_camcorder_set_message_callback(handle->mm_handle, mm_recorder_msg_cb, (void*)handle);
+	mm_camcorder_set_message_callback(handle->mm_handle, __mm_recorder_msg_cb, (void*)handle);
 	handle->camera = NULL;
 	handle->type = _RECORDER_TYPE_AUDIO;
 
@@ -352,15 +359,15 @@ int recorder_create_audiorecorder( recorder_h* recorder){
 
 int recorder_get_state(recorder_h recorder, recorder_state_e * state){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
-	if( state == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( state == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 
 	recorder_s *handle = (recorder_s*)recorder;
 
 	MMCamcorderStateType mmstate ;
 	recorder_state_e capi_state;
 	mm_camcorder_get_state(handle->mm_handle, &mmstate);	
-	capi_state = _recorder_state_convert(mmstate);
+	capi_state = __recorder_state_convert(mmstate);
 
 	*state = capi_state;
 	return CAMERA_ERROR_NONE;
@@ -369,7 +376,7 @@ int recorder_get_state(recorder_h recorder, recorder_state_e * state){
 
 int recorder_destroy( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 	recorder_s * handle;
 	int ret;
 
@@ -384,7 +391,7 @@ int recorder_destroy( recorder_h recorder){
 																MMCAM_CAPTURE_COUNT, 1, 
 																(void*)NULL);
 		
-		mm_camcorder_set_message_callback(handle->mm_handle, mm_message_callback, (void*)handle->camera);
+		mm_camcorder_set_message_callback(handle->mm_handle, __mm_camera_message_callback, (void*)handle->camera);
 	}else{
 		ret = mm_camcorder_destroy(handle->mm_handle);
 	}
@@ -392,13 +399,13 @@ int recorder_destroy( recorder_h recorder){
 	if(ret == MM_ERROR_NONE)
 		free(handle);
 
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 
 }
 
 int recorder_prepare( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
  	int ret = 0;
 	recorder_s *handle = (recorder_s*)recorder;
 
@@ -410,7 +417,7 @@ int recorder_prepare( recorder_h recorder){
 		ret = mm_camcorder_realize(handle->mm_handle);	
 		if( ret != MM_ERROR_NONE){
 			LOGE("[%s] mm_camcorder_realize fail", __func__);
-			return _convert_recorder_error_code(__func__, ret);
+			return __convert_recorder_error_code(__func__, ret);
 		}
 		
 	}
@@ -420,7 +427,7 @@ int recorder_prepare( recorder_h recorder){
 	if( ret != MM_ERROR_NONE){
 		LOGE("[%s] mm_camcorder_start fail", __func__);	
 		mm_camcorder_unrealize(handle->mm_handle);
-		return _convert_recorder_error_code(__func__, ret);
+		return __convert_recorder_error_code(__func__, ret);
 	}	
 
 	return RECORDER_ERROR_NONE;
@@ -428,7 +435,7 @@ int recorder_prepare( recorder_h recorder){
 
 int recorder_unprepare( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
  	int ret = 0;
 	recorder_s *handle = (recorder_s*)recorder;
 
@@ -439,64 +446,64 @@ int recorder_unprepare( recorder_h recorder){
 		ret = mm_camcorder_stop(handle->mm_handle);	
 		if( ret != MM_ERROR_NONE){
 			LOGE("[%s] mm_camcorder_stop fail", __func__);	
-			return _convert_recorder_error_code(__func__, ret);
+			return __convert_recorder_error_code(__func__, ret);
 		}
 	}
 	ret = mm_camcorder_unrealize(handle->mm_handle);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 int recorder_start( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
  	int ret;
 	recorder_s *handle = (recorder_s*)recorder;
 	ret = mm_camcorder_record(handle->mm_handle);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 int recorder_pause( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s *handle = (recorder_s*)recorder;
 	ret = mm_camcorder_pause(handle->mm_handle);
 
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 int recorder_commit( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
  	int ret;
 	recorder_s *handle = (recorder_s*)recorder;
 	ret = mm_camcorder_commit(handle->mm_handle);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_cancel( recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
  	int ret;
 	recorder_s *handle = (recorder_s*)recorder;
 	ret = mm_camcorder_cancel(handle->mm_handle);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_set_filename(recorder_h recorder,  const char *filename){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	g_return_val_if_fail(filename != NULL, RECORDER_ERROR_INVALID_PARAMETER);			
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL,  MMCAM_TARGET_FILENAME  , filename , strlen(filename), NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 
 }
 
 int recorder_get_filename(recorder_h recorder,  char **filename){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	g_return_val_if_fail(filename != NULL, RECORDER_ERROR_INVALID_PARAMETER);			
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
@@ -508,14 +515,14 @@ int recorder_get_filename(recorder_h recorder,  char **filename){
 		*filename = strdup(record_filename);
 	}
 
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 
 int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	int format_table[3] = { MM_FILE_FORMAT_3GP ,  // RECORDER_FILE_FORMAT_3GP,
 											  MM_FILE_FORMAT_MP4 , //RECORDER_FILE_FORMAT_MP4,
@@ -527,12 +534,12 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
 	
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_FILE_FORMAT  , format_table[format], NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	g_return_val_if_fail(format != NULL, RECORDER_ERROR_INVALID_PARAMETER);		
 	
 	int ret;
@@ -556,14 +563,14 @@ int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format
 				break;
 		}
 	}	
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 
 
 int recorder_set_state_changed_cb(recorder_h recorder, recorder_state_changed_cb callback, void* user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 	recorder_s *handle = (recorder_s*)recorder;
 	if( callback == NULL )
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -577,7 +584,7 @@ int recorder_set_state_changed_cb(recorder_h recorder, recorder_state_changed_cb
 
 int recorder_unset_state_changed_cb(recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	recorder_s *handle = (recorder_s*)recorder;
 
 	handle->user_cb[_RECORDER_EVENT_TYPE_STATE_CHANGE] = NULL;
@@ -588,7 +595,7 @@ int recorder_unset_state_changed_cb(recorder_h recorder){
 
 int recorder_set_recording_status_cb(recorder_h recorder, recorder_recording_status_cb callback, void* user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	recorder_s *handle = (recorder_s*)recorder;
 	if( callback == NULL )
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -601,7 +608,7 @@ int recorder_set_recording_status_cb(recorder_h recorder, recorder_recording_sta
 
 int recorder_unset_recording_status_cb(recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	recorder_s *handle = (recorder_s*)recorder;	
 	handle->user_cb[_RECORDER_EVENT_TYPE_RECORDING_STATUS] = NULL;
 	handle->user_data[_RECORDER_EVENT_TYPE_RECORDING_STATUS] = NULL;
@@ -612,7 +619,7 @@ int recorder_unset_recording_status_cb(recorder_h recorder){
 
 int recorder_set_recording_limit_reached_cb(recorder_h recorder, recorder_recording_limit_reached_cb callback, void* user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	recorder_s *handle = (recorder_s*)recorder;
 	if( callback == NULL )
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -626,7 +633,7 @@ int recorder_set_recording_limit_reached_cb(recorder_h recorder, recorder_record
 
 int recorder_unset_recording_limit_reached_cb(recorder_h recorder){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	recorder_s *handle = (recorder_s*)recorder;
 	handle->user_cb[_RECORDER_EVENT_TYPE_RECORDING_LIMITED] = NULL;
 	handle->user_data[_RECORDER_EVENT_TYPE_RECORDING_LIMITED] = NULL;
@@ -636,8 +643,8 @@ int recorder_unset_recording_limit_reached_cb(recorder_h recorder){
 
 int recorder_foreach_supported_file_format(recorder_h recorder, recorder_supported_file_format_cb foreach_cb , void *user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
-	if( foreach_cb == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);			
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( foreach_cb == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);			
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	MMCamAttrsInfo info;
@@ -676,35 +683,35 @@ int recorder_foreach_supported_file_format(recorder_h recorder, recorder_support
 
 int recorder_attr_set_size_limit(recorder_h recorder,  int kbyte){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, "target-max-size"  , kbyte, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_set_time_limit(recorder_h recorder,  int second){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_TARGET_TIME_LIMIT , second, NULL);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_attr_set_audio_device(recorder_h recorder , recorder_audio_device_e device){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_DEVICE , device, NULL);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e  codec){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 
 	if( codec < RECORDER_AUDIO_CODEC_AMR || codec > RECORDER_AUDIO_CODEC_AAC)
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -722,13 +729,13 @@ int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e  code
 	
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_ENCODER , audio_table[codec], NULL);
 
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_get_audio_encoder(recorder_h recorder, recorder_audio_codec_e *codec){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	g_return_val_if_fail(codec != NULL, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	int mm_codec = 0;
@@ -749,12 +756,12 @@ int recorder_get_audio_encoder(recorder_h recorder, recorder_audio_codec_e *code
 		}
 	}
 		
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e  codec){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 
 	int video_table[3] = { MM_VIDEO_CODEC_H263,		//RECORDER_VIDEO_CODEC_H263,			/**< H263 codec		*/
@@ -769,15 +776,15 @@ int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e  code
 		return RECORDER_ERROR_INVALID_STATE;
 
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_VIDEO_ENCODER   , video_table[codec], NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 
 
 int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *codec){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
-	if( codec == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
+	if( codec == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);	
 
 	int ret;
 	int mm_codec = 0;
@@ -801,109 +808,109 @@ int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *code
 		}
 	}
 	
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_set_audio_samplerate(recorder_h recorder, int samplerate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_SAMPLERATE  , samplerate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_set_audio_encoder_bitrate(recorder_h recorder,  int bitrate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_ENCODER_BITRATE  , bitrate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_set_video_encoder_bitrate(recorder_h recorder,  int bitrate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_VIDEO_ENCODER_BITRATE  , bitrate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_get_size_limit(recorder_h recorder,  int *kbyte){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, "target-max-size"  , kbyte, NULL);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 int recorder_attr_get_time_limit(recorder_h recorder,  int *second){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_TARGET_TIME_LIMIT , second, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_get_audio_device(recorder_h recorder , recorder_audio_device_e *device){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_DEVICE , device, NULL);
-	return _convert_recorder_error_code(__func__, ret);	
+	return __convert_recorder_error_code(__func__, ret);	
 }
 
 
 
 int recorder_attr_get_audio_samplerate(recorder_h recorder, int *samplerate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_SAMPLERATE , samplerate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_attr_get_audio_encoder_bitrate(recorder_h recorder,  int *bitrate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_ENCODER_BITRATE , bitrate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 }
 
 int recorder_attr_get_video_encoder_bitrate(recorder_h recorder,  int *bitrate){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_VIDEO_ENCODER_BITRATE , bitrate, NULL);
-	return _convert_recorder_error_code(__func__, ret);
+	return __convert_recorder_error_code(__func__, ret);
 	
 }
 
 int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_supported_audio_encoder_cb foreach_cb , void *user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
-	if( foreach_cb == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+	if( foreach_cb == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	MMCamAttrsInfo info;
 	ret = mm_camcorder_get_attribute_info(handle->mm_handle, MMCAM_AUDIO_ENCODER , &info);
 	if( ret != RECORDER_ERROR_NONE )
-		return _convert_recorder_error_code(__func__, ret);
+		return __convert_recorder_error_code(__func__, ret);
 	
 	int i;
 	for( i=0 ; i < info.int_array.count ; i++)
@@ -927,14 +934,14 @@ int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_suppo
 }
 int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_supported_video_encoder_cb foreach_cb , void *user_data){
 	
-	if( recorder == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
-	if( foreach_cb == NULL) return _convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	if( foreach_cb == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
 	int ret;
 	recorder_s * handle = (recorder_s*)recorder;
 	MMCamAttrsInfo info;
 	ret = mm_camcorder_get_attribute_info(handle->mm_handle, MMCAM_VIDEO_ENCODER , &info);
 	if( ret != RECORDER_ERROR_NONE )
-		return _convert_recorder_error_code(__func__, ret);
+		return __convert_recorder_error_code(__func__, ret);
 	
 	int i;
 	for( i=0 ; i < info.int_array.count ; i++)
