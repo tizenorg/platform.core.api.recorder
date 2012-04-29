@@ -11,7 +11,7 @@
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
-* limitations under the License. 
+* limitations under the License.
 */
 
 
@@ -32,6 +32,8 @@
 #undef LOG_TAG
 #endif
 #define LOG_TAG "TIZEN_N_RECORDER"
+
+#define LOWSET_DECIBEL -300.0
 
 
 /*
@@ -194,7 +196,7 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 
 	recorder_s * handle = (recorder_s*)user_data;
 	MMMessageParamType *m = (MMMessageParamType*)param;
-	recorder_state_e previous_state; 
+	recorder_state_e previous_state;
 
 	switch(message){
 		case MM_MESSAGE_CAMCORDER_STATE_CHANGED:
@@ -253,9 +255,10 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 			}
 			break;
 		}
-
-
-			
+		case MM_MESSAGE_CAMCORDER_CURRENT_VOLUME:
+			if( handle->last_max_input_level < m->rec_volume_dB )
+				handle->last_max_input_level = m->rec_volume_dB;
+			break;
 	}
 
 	return 1;
@@ -284,7 +287,8 @@ int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){
 	}
 
 	memset(handle, 0 , sizeof(recorder_s));		
-		
+	handle->last_max_input_level = LOWSET_DECIBEL;
+
 	handle->mm_handle = ((camera_s*)camera)->mm_handle;
 	handle->camera = camera;
 	handle->state = RECORDER_STATE_CREATED;
@@ -302,8 +306,8 @@ int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){
 	preview_format = MM_PIXEL_FORMAT_NV12;	
 	ret = mm_camcorder_get_attributes(handle->mm_handle, NULL, MMCAM_RECOMMEND_PREVIEW_FORMAT_FOR_RECORDING, &preview_format, NULL);
 	
-	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL, 
-																MMCAM_MODE , MM_CAMCORDER_MODE_VIDEO, 
+	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL,
+																MMCAM_MODE , MM_CAMCORDER_MODE_VIDEO,
 																MMCAM_CAMERA_FORMAT, preview_format,
 																(void*)NULL);
 	return __convert_recorder_error_code(__func__, ret);
@@ -326,6 +330,7 @@ int recorder_create_audiorecorder( recorder_h* recorder){
 	}
 	
 	memset(handle, 0 , sizeof(recorder_s));
+	handle->last_max_input_level = LOWSET_DECIBEL;
 	
 	ret = mm_camcorder_create(&handle->mm_handle, &info);
 	if( ret != MM_ERROR_NONE){
@@ -333,8 +338,8 @@ int recorder_create_audiorecorder( recorder_h* recorder){
 		LOGE("[%s] mm_camcorder_create fail", __func__);
 		return __convert_recorder_error_code(__func__, ret);
 	}
-	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL, 
-																MMCAM_MODE , MM_CAMCORDER_MODE_AUDIO, 
+	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL,
+																MMCAM_MODE , MM_CAMCORDER_MODE_AUDIO,
 																(void*)NULL);
 
 	if( ret != MM_ERROR_NONE){
@@ -383,12 +388,12 @@ int recorder_destroy( recorder_h recorder){
 	handle = (recorder_s *) recorder;
 	if( handle->type == _RECORDER_TYPE_VIDEO ){
 		//camera object mode change
-		ret = mm_camcorder_set_attributes(handle->mm_handle, NULL, 
-																MMCAM_MODE , MM_CAMCORDER_MODE_IMAGE, 
+		ret = mm_camcorder_set_attributes(handle->mm_handle, NULL,
+																MMCAM_MODE , MM_CAMCORDER_MODE_IMAGE,
 																MMCAM_CAMERA_FORMAT,  handle->origin_preview_format,
-																MMCAM_IMAGE_ENCODER , MM_IMAGE_CODEC_JPEG, 
+																MMCAM_IMAGE_ENCODER , MM_IMAGE_CODEC_JPEG,
 																MMCAM_CAPTURE_FORMAT, MM_PIXEL_FORMAT_ENCODED,
-																MMCAM_CAPTURE_COUNT, 1, 
+																MMCAM_CAPTURE_COUNT, 1,
 																(void*)NULL);
 		
 		mm_camcorder_set_message_callback(handle->mm_handle, __mm_camera_message_callback, (void*)handle->camera);
@@ -488,6 +493,18 @@ int recorder_cancel( recorder_h recorder){
 	recorder_s *handle = (recorder_s*)recorder;
 	ret = mm_camcorder_cancel(handle->mm_handle);
 	return __convert_recorder_error_code(__func__, ret);	
+}
+
+int recorder_get_audio_level(recorder_h recorder, double *level){
+	if( recorder == NULL || level == NULL ) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	recorder_s *handle = (recorder_s*)recorder;
+
+	if( handle->state < RECORDER_STATE_RECORDING )
+		return RECORDER_ERROR_INVALID_STATE;
+
+	*level = handle->last_max_input_level ;
+	handle->last_max_input_level = LOWSET_DECIBEL;
+	return RECORDER_ERROR_NONE;
 }
 
 int recorder_set_filename(recorder_h recorder,  const char *filename){
@@ -969,3 +986,24 @@ int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_suppo
 	
 }
 
+
+int recorder_attr_set_mute(recorder_h recorder, bool enable){
+	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	recorder_s * handle = (recorder_s*)recorder;
+	int ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_VOLUME , enable ? 0.0 : 1.0 , NULL);
+	return  __convert_recorder_error_code(__func__, ret);;
+}
+
+bool recorder_attr_is_muted(recorder_h recorder){
+	if( recorder == NULL){
+		__convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+		return false;
+	}
+	recorder_s * handle = (recorder_s*)recorder;
+	double volume = 1.0;
+	mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_AUDIO_VOLUME , &volume , NULL);
+	if( volume == 0.0 )
+		return true;
+	else
+		return false;
+}

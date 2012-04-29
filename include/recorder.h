@@ -407,6 +407,18 @@ int recorder_cancel(recorder_h recorder);
  */
 int recorder_get_state(recorder_h recorder, recorder_state_e *state);
 
+/**
+ * @brief Gets the peak audio input level that was sampled since the last call to this function.
+ * @remarks 0 dB indicates maximum input level, -300dB indicates minimum input level
+ * @param[in]  recorder The handle to the recorder.
+ * @param[out]	level  The audio input level in dB
+ * @return  0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
+ * @pre The recorder state must be #RECORDER_STATE_RECORDING or #RECORDER_STATE_PAUSED
+ */
+int recorder_get_audio_level(recorder_h recorder, double *dB);
 
 /**
  * @brief  Sets the file path to record
@@ -868,6 +880,31 @@ int recorder_attr_get_audio_encoder_bitrate(recorder_h recorder, int *bitrate);
  * @see	recorder_attr_set_audio_encoder_bitrate()
  */
 int recorder_attr_get_video_encoder_bitrate(recorder_h recorder, int *bitrate);
+
+
+
+/**
+ * @brief  Sets the mute state of recorder
+ * @param[in] recorder The handle to media recorder
+ * @param[in] enable The mute state
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_is_muted()
+ */
+int recorder_attr_set_mute(recorder_h recorder, bool enable);
+
+/**
+ * @brief  Gets the mute state of recorder
+ * @param[in] recorder The handle to media recorder
+ * @return	true if the recorder is not recording any sound,\nelse false
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_set_mute()
+ */
+bool recorder_attr_is_muted(recorder_h recorder);
+
+
 
 /**
  * @}

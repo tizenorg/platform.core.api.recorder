@@ -3,16 +3,16 @@ Source: capi-media-recorder
 Section: libs
 Priority: extra
 Maintainer: Seungkeun Lee <sngn.lee@samsung.com>, Kangho Hur<kagho.hur@samsung.com>
-Build-Depends: debhelper (>= 5), libmm-camcorder-dev, libmm-common-dev, capi-media-camera-dev
+Build-Depends: debhelper (>= 5), libmm-camcorder-dev, libmm-common-dev, capi-media-camera-dev, dlog-dev
 
 Package: capi-media-recorder
 Architecture: any
-Depends: ${shilbs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: A Camera library in Tizen Native API
 
 Package: capi-media-recorder-dev
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, capi-media-recorder (= ${Source-Version}), dlog-dev, capi-base-common-dev, capi-media-camera-dev, libmm-camcorder-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}, capi-media-recorder (= ${Source-Version}), capi-base-common-dev, capi-media-camera-dev
 Description: A Camera library in Tizen Native API (DEV)
 
 Package: capi-media-recorder-dbg

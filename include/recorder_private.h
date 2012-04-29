@@ -46,6 +46,7 @@ typedef struct _recorder_s{
 	int state;
 	_recorder_type_e  type;
 	int origin_preview_format;
+	double last_max_input_level;
 
 } recorder_s;
 

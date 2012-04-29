@@ -24,9 +24,7 @@ SET(submodule "recorder")
 
 # for package file
 SET(dependents "dlog mm-camcorder capi-media-camera")
-
-# for deb
-SET(deb_dependents "libdlog-0 libmm-camcorder capi-media-camera")
+SET(pc_dependents "capi-base-common capi-media-camera")
 
 SET(fw_name "${project_prefix}-${service}-${submodule}")
 
@@ -78,9 +76,8 @@ INSTALL(
         )
 
 SET(PC_NAME ${fw_name})
-SET(PC_REQUIRED ${dependents})
+SET(PC_REQUIRED ${pc_dependents})
 SET(PC_LDFLAGS -l${fw_name})
-SET(PC_CFLAGS -I\${includedir}/${service})
 
 CONFIGURE_FILE(
     ${fw_name}.pc.in

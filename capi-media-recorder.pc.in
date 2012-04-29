@@ -11,5 +11,5 @@ Description: @PACKAGE_DESCRIPTION@
 Version: @VERSION@
 Requires: @PC_REQUIRED@ 
 Libs: -L${libdir} @PC_LDFLAGS@
-Cflags: -I${includedir} @PC_CFLAGS@
+Cflags: -I${includedir}
 
