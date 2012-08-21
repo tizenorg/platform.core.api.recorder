@@ -20,6 +20,7 @@
 #define	__TIZEN_MULTIMEDIA_RECORDER_H__
 #include <tizen.h>
 #include <camera.h>
+#include <audio_io.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +56,7 @@ typedef enum
 		RECORDER_ERROR_DEVICE = RECORDER_ERROR_CLASS | 0x04,	        /**< Device error */
 		RECORDER_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,	/**< Internal error */
 		RECORDER_ERROR_SOUND_POLICY = RECORDER_ERROR_CLASS | 0x06,	    /**< Blocked by Audio Session Manager */
+		RECORDER_ERROR_SECURITY_RESTRICTED = RECORDER_ERROR_CLASS | 0x07,    /**< Restricted by security system policy */
 } recorder_error_e;
 
 /**
@@ -87,6 +89,8 @@ typedef enum
         RECORDER_FILE_FORMAT_3GP,                     /**< 3GP file format */
         RECORDER_FILE_FORMAT_MP4,                     /**< MP4 file format */
         RECORDER_FILE_FORMAT_AMR,                     /**< AMR file format */
+        RECORDER_FILE_FORMAT_ADTS,                   /**< ADTS file format */
+        RECORDER_FILE_FORMAT_WAV,                    /**< WAV file format */
 } recorder_file_format_e;
 
 
@@ -95,8 +99,11 @@ typedef enum
  */
 typedef enum
 {
-	RECORDER_AUDIO_CODEC_AMR,			/**< AMR codec */
+	RECORDER_AUDIO_CODEC_DISABLE = -1, /**< Disable audio track */
+	RECORDER_AUDIO_CODEC_AMR = 0,			/**< AMR codec */
 	RECORDER_AUDIO_CODEC_AAC,			/**< AAC codec */
+	RECORDER_AUDIO_CODEC_VORBIS,	/**< Vorbis codec */
+	RECORDER_AUDIO_CODEC_PCM			/**< PCM codec */
 } recorder_audio_codec_e;
 
 /**
@@ -107,6 +114,7 @@ typedef enum
 	RECORDER_VIDEO_CODEC_H263,			/**< H263 codec */
 	RECORDER_VIDEO_CODEC_H264,			/**< H264 codec */
 	RECORDER_VIDEO_CODEC_MPEG4,		/**< MPEG4 codec */
+	RECORDER_VIDEO_CODEC_THEORA		/**< Theora codec */
 } recorder_video_codec_e;
 
 /**
@@ -118,6 +126,26 @@ typedef enum
 	RECORDER_AUDIO_DEVICE_MODEM,	/**< Modem */
 } recorder_audio_device_e;
 
+/**
+ * @brief Enumerations of the recorder rotation type.
+ */
+typedef enum
+{
+	RECORDER_ROTATION_NONE,	/**< No rotation */
+	RECORDER_ROTATION_90,		/**< 90 degree rotation */
+	RECORDER_ROTATION_180,	/**< 180 degree rotation */
+	RECORDER_ROTATION_270,	/**< 270 degree rotation */
+} recorder_rotation_e;
+
+/**
+ * @brief Enumerations of the recorder policy.
+ */
+typedef enum
+{
+	RECORDER_POLICY_NONE = 0, /**< None */
+	RECORDER_POLICY_SOUND, /**< Sound policy */
+	RECORDER_POLICY_SECURITY /**< Security policy */
+} recorder_policy_e;
 
 /**
  * @}
@@ -160,7 +188,7 @@ typedef void (*recorder_recording_status_cb)(int elapsed_time, int file_size, vo
  * @brief  Called when the record state has changed.
  * @param[in] previous	The previous state of recorder
  * @param[in] current	The current state of recorder
- * @param[in] by_policy	@c true if the recorder state is changed by sound policy, otherwise @c false
+ * @param[in] by_policy     @c true if the state is changed by policy, otherwise @c false
  * @param[in] user_data	The user data passed from the callback registration function
  * @pre This function is required to register a callback using recorder_set_state_changed_cb()
  * @see	recorder_set_state_changed_cb()
@@ -172,6 +200,57 @@ typedef void (*recorder_recording_status_cb)(int elapsed_time, int file_size, vo
  * @see	recorder_cancel()
  */
 typedef void (*recorder_state_changed_cb)(recorder_state_e previous , recorder_state_e current , bool by_policy, void *user_data);
+
+/**
+ * @brief	Called when the recorder interrupted by policy
+ *
+ * @param[in] policy     		The policy that interrupting the recorder
+ * @param[in] previous      The previous state of the recorder
+ * @param[in] current       The current state of the recorder
+ * @param[in] user_data     The user data passed from the callback registration function
+ * @see	recorder_set_interrupted_cb()
+ */
+typedef void (*recorder_interrupted_cb)(recorder_policy_e policy, recorder_state_e previous, recorder_state_e current, void *user_data);
+
+/**
+ * @brief Called when audio stream data was delivering just before storing in record file.
+ * @remarks
+ * The callback function holds the same buffer that will be recorded.\n
+ * So if an user change the buffer, the result file will has the buffer.\n
+ * The callback is called via internal thread of Frameworks. so don't be invoke UI API, recorder_unprepare(), recorder_commit() and recorder_cancel() in callback.
+ *
+ * @param[in] stream The audio stream data
+ * @param[in] size The size of stream data
+ * @param[in] format The audio format
+ * @param[in] channel The number of channel
+ * @param[in] timestamp The timestamp of stream buffer( in msec )
+ * @param[in] user_data The user data passed from the callback registration function
+ *
+ * @see recorder_set_audio_stream_cb()
+ */
+typedef void (*recorder_audio_stream_cb)(void* stream, int size, audio_sample_type_e format, int channel, unsigned int timestamp, void *user_data);
+
+/**
+ * @brief	Called when the error occurred.
+ *
+ * @remarks
+ * This callback inform critical error situation.\n
+ * When invoked this callback, user should release the resource and terminate application.\n
+ * These error code will be occurred\n
+ * #RECORDER_ERROR_DEVICE\n
+ * #RECORDER_ERROR_INVALID_OPERATION\n
+ * #RECORDER_ERROR_OUT_OF_MEMORY\n
+ *
+ * @param[in] error		The error code
+ * @param[in] current_state	The current state of the recorder
+ * @param[in] user_data		The user data passed from the callback registration function
+ *
+ * @pre	This callback function is invoked if you register this callback using recorder_set_error_cb().
+ * @see	recorder_set_error_cb()
+ * @see	recorder_unset_error_cb()
+ */
+typedef void (*recorder_error_cb)(recorder_error_e error, recorder_state_e current_state, void *user_data);
+
 
  /**
  * @}
@@ -476,6 +555,7 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
  */
 int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format);
 
+
  /**
  * @}
 */
@@ -511,14 +591,15 @@ int recorder_foreach_supported_file_format(recorder_h recorder, recorder_support
 
 /**
  * @brief  Sets the audio codec for encoding audio stream
- * @remarks You can get available audio encoders by using recorder_foreach_supported_audio_encoder().
+ * @remarks You can get available audio encoders by using recorder_foreach_supported_audio_encoder().\n
+ * if set to RECORDER_AUDIO_CODEC_DISABLE, audio track is not created in recording files.
  * @param[in] recorder The handle to media recorder
  * @param[in] codec    The audio codec
  * @return	0 on success, otherwise a negative error value.
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
- * @pre The recorder state must be #RECORDER_STATE_CREATED
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY
  * @see	recorder_get_audio_encoder()
  * @see recorder_foreach_supported_audio_encoder()
  */
@@ -579,7 +660,7 @@ int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_suppo
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
- * @pre The recorder state must be #RECORDER_STATE_CREATED
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY
  * @see recorder_get_video_encoder()
  * @see recorder_foreach_supported_video_encoder()
  */
@@ -656,6 +737,70 @@ int recorder_set_state_changed_cb(recorder_h recorder, recorder_state_changed_cb
  */
 int recorder_unset_state_changed_cb(recorder_h recorder);
 
+/**
+ * @brief	Registers a callback function to be called when recorder interrupted by policy.
+ *
+ * @param[in] recorder	The handle to the recorder
+ * @param[in] callback	  The callback function to register
+ * @param[in] user_data   The user data to be passed to the callback function
+ *
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see recorder_unset_interrupted_cb()
+ * @see	recorder_interrupted_cb()
+ */
+int recorder_set_interrupted_cb(recorder_h recorder, recorder_interrupted_cb callback,
+	    void *user_data);
+
+/**
+ * @brief	Unregisters the callback function.
+ *
+ * @param[in]	recorder	The handle to the recorder
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see     recorder_set_interrupted_cb()
+ */
+int recorder_unset_interrupted_cb(recorder_h recorder);
+
+/**
+ * @brief	Registers a callback function to be called when audio stream data was delivering
+ *
+ * @remarks
+ * This callback function holds the same buffer that will be recorded.\n
+ * So if an user change the buffer, the result file will has the buffer.\n
+ * The callback is called via internal thread of Frameworks. so don't be invoke UI API, recorder_unprepare(), recorder_commit() and recorder_cancel() in callback.\n
+ * This callback function to be called in RECORDER_STATE_RECORDING and RECORDER_STATE_PAUSE state.
+ *
+ * @param[in] recorder	The handle to the recorder
+ * @param[in] callback	  The callback function to register
+ * @param[in] user_data   The user data to be passed to the callback function
+ *
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre		The recorder state should be #RECORDER_STATE_READY or #RECORDER_STATE_CREATED.
+ *
+ * @see recorder_unset_audio_stream_cb()
+ * @see recorder_audio_stream_cb()
+ */
+int recorder_set_audio_stream_cb(recorder_h recorder, recorder_audio_stream_cb callback, void* user_data);
+
+/**
+ * @brief	Unregisters the callback function.
+ *
+ * @param[in]	recorder	The handle to the recorder
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see     recorder_set_audio_stream_cb()
+ */
+int recorder_unset_audio_stream_cb(recorder_h recorder);
+
 
 /**
  * @brief  Registers a callback function to be invoked when the recording information changes.
@@ -709,6 +854,45 @@ int recorder_set_recording_limit_reached_cb(recorder_h recorder, recorder_record
  * @see	recorder_set_recording_limit_reached_cb()
  */
 int recorder_unset_recording_limit_reached_cb(recorder_h recorder);
+
+
+/**
+ * @brief	Registers a callback function to be called when an asynchronous operation error occurred.
+ *
+ * @remarks
+ * This callback inform critical error situation.\n
+ * When invoked this callback, user should release the resource and terminate application.\n
+ * These error code will be occurred\n
+ * #RECORDER_ERROR_DEVICE\n
+ * #RECORDER_ERROR_INVALID_OPERATION\n
+ * #RECORDER_ERROR_OUT_OF_MEMORY\n
+ *
+ * @param[in]	recorder	The handle to the recorder
+ * @param[in]	callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @post	This function will invoke recorder_error_cb() when an asynchronous operation error occur.
+ *
+ * @see recorder_unset_error_cb()
+ * @see recorder_error_cb()
+ */
+int recorder_set_error_cb(recorder_h recorder, recorder_error_cb callback, void *user_data);
+
+
+/**
+ * @brief	Unregisters the callback function.
+ *
+ * @param[in]	recorder	The handle to the recorder
+ * @return	  0 on success, otherwise a negative error value.
+ * @retval    #RECORDER_ERROR_NONE Successful
+ * @retval    #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see recorder_set_error_cb()
+ */
+int recorder_unset_error_cb(recorder_h recorder);
+
 
 /**
  * @}
@@ -898,13 +1082,99 @@ int recorder_attr_set_mute(recorder_h recorder, bool enable);
  * @brief  Gets the mute state of recorder
  * @param[in] recorder The handle to media recorder
  * @return	true if the recorder is not recording any sound,\nelse false
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @see	recorder_attr_set_mute()
  */
 bool recorder_attr_is_muted(recorder_h recorder);
 
+/**
+ * @brief  Sets recording motion rate
+ * @remarks
+ * This attribute is valid only in video recorder.\n
+ * If the rate bigger than 0 and smaller than 1, video is recorded slow motion mode.\n
+ * If the rate bigger than 1, video is recorded fast motion mode(time lapse recording).
+ * Audio data is not recorded.\n
+ * To reset slow motion recording, setting rate to 1.
+ * @param[in] recorder The handle to media recorder
+ * @param[in] rate The recording motion rate. it is computed with fps. (0<rate<1 for slow motion, 1<rate for fast motion(time lapse recording), 1 to reset )
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY
+ * @see	recorder_attr_get_recording_motion_rate()
+ */
+int recorder_attr_set_recording_motion_rate(recorder_h recorder , double rate);
 
+/**
+ * @brief  Gets the recording motion rate
+ * @remarks
+ * This attribute is valid only in video recorder.\n
+ * If the rate bigger than 0 and smaller than 1, video is recorded slow motion mode.\n
+ * If the rate bigger than 1, video is recorded fast motion mode(time lapse recording).
+ * Audio data is not recorded.\n
+ * To reset slow motion recording, setting rate to 1.
+ * @param[in] recorder The handle to media recorder
+ * @param[out] rate The recording motion rate. it is computed with fps.
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_set_recording_motion_rate()
+ */
+int recorder_attr_get_recording_motion_rate(recorder_h recorder , double *rate);
+
+__attribute__ ((deprecated)) int recorder_attr_set_slow_motion_rate(recorder_h recorder , double rate);
+__attribute__ ((deprecated)) int recorder_attr_get_slow_motion_rate(recorder_h recorder , double *rate);
+
+/**
+ * @brief  Sets the numer of audio channel.
+ * @remarks This attribute is applied only in RECORDER_STATE_CREATED state.\n
+ * For mono recording, setting channel to 1.\n
+ * For stereo recording, setting channel to 2.
+ * @param[in] recorder  The handle to media recorder
+ * @param[in] channel_count The number of audio channel
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre The recorder state must be #RECORDER_STATE_CREATED
+ * @see	recorder_attr_get_audio_channel()
+ */
+int recorder_attr_set_audio_channel(recorder_h recorder, int channel_count);
+
+/**
+ * @brief  Gets the numer of audio channel.
+ * @param[in] recorder  The handle to media recorder
+ * @param[out] channel_count The number of audio channel
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_set_audio_channel()
+ */
+int recorder_attr_get_audio_channel(recorder_h recorder, int *channel_count);
+
+/**
+ * @brief Sets the orientation of video recording data
+ * @remarks
+ * This attribute is valid only in video recorder.\n
+ * @param[in] recorder  The handle to media recorder
+ * @param[in] orientation The orientation of video recording data
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_get_recording_orientation()
+ */
+int recorder_attr_set_recording_orientation(recorder_h recorder, recorder_rotation_e orientation);
+
+/**
+ * @brief Gets the orientation of video recording data
+ * @remarks
+ * This attribute is valid only in video recorder.\n
+ * @param[in] recorder  The handle to media recorder
+ * @param[out] orientation The orientation of video recording data
+ * @return	0 on success, otherwise a negative error value.
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @see	recorder_attr_set_recording_orientation()
+ */
+int recorder_attr_get_recording_orientation(recorder_h recorder, recorder_rotation_e *orientation);
 
 /**
  * @}

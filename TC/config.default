@@ -1,0 +1,3 @@
+CAPI_PROJECT_ROOT=/home/abyss/capi
+TET_INSTALL_HOST_PATH=/home/abyss/TETware
+TET_INSTALL_TARGET_PATH=/mnt/nfs/TETware

@@ -683,7 +683,7 @@ int video_recorder_test(){
 	camera_create(CAMERA_DEVICE_CAMERA0 , &camera);
 	recorder_create_videorecorder(camera, &recorder);
 	camera_set_display(camera,CAMERA_DISPLAY_TYPE_X11,GET_DISPLAY(preview_win));
-	camera_set_x11_display_rotation(camera, CAMERA_DISPLAY_ROTATION_270);
+	camera_set_x11_display_rotation(camera, CAMERA_ROTATION_270);
 	//camera_set_preview_resolution(camera, 320, 240);
 	camera_attr_set_preview_fps(camera, CAMERA_ATTR_FPS_AUTO);
 	ret = recorder_set_file_format(recorder,RECORDER_FILE_FORMAT_MP4);
@@ -819,7 +819,7 @@ int recorder_encoder_test(){
 	
 
 	ret+=camera_create(CAMERA_DEVICE_CAMERA0,&camera);
-	ret+=camera_set_x11_display_rotation(camera, CAMERA_DISPLAY_ROTATION_270);
+	ret+=camera_set_x11_display_rotation(camera, CAMERA_ROTATION_270);
 	ret+=camera_set_display(camera, CAMERA_DISPLAY_TYPE_X11, GET_DISPLAY(preview_win));
 
 
@@ -937,10 +937,155 @@ int recorder_encoder_test(){
 	return ret;
 }
 
+ Eina_Bool print_audio_level(void *data){
+ 	recorder_h recorder = (recorder_h)data;
+	if( recorder ){
+		double level; 
+		recorder_get_audio_level(recorder,&level);
+		printf("%g\n", level);
+	}
+ 	return 1;
+}
+
+int audio_level_test(){
+	recorder_h recorder;
+	recorder_create_audiorecorder(&recorder);
+	recorder_set_audio_encoder(recorder, RECORDER_AUDIO_CODEC_AMR);
+	recorder_set_file_format(recorder, RECORDER_FILE_FORMAT_AMR);
+	recorder_set_filename(recorder, "/mnt/nfs/test.amr");
+	
+	recorder_prepare(recorder);
+	recorder_start(recorder);
+	ecore_timer_add(0.1, print_audio_level, recorder);
+	sleep(2);
+	return 0;
+}
+
+void _camera_state_changed_cb(camera_state_e previous, camera_state_e current,bool by_policy, void *user_data){
+	printf("camera state changed %d -> %d\n", previous , current);
+}
+
+void _recorder_state_changed_cb(recorder_state_e previous , recorder_state_e current , bool by_policy, void *user_data){
+	printf("recorder state changed %d -> %d\n", previous , current);
+}
+
+int slow_motion_test(){
+	camera_h camera;
+	recorder_h recorder;
+	int ret;
+	ret = camera_create(CAMERA_DEVICE_CAMERA0, &camera);
+	printf("camera_create ret = %x\n", ret);
+	camera_set_state_changed_cb(camera, _camera_state_changed_cb, NULL);
+	ret = recorder_create_videorecorder(camera, &recorder);
+	printf("recorder_create_videorecorder ret = %x\n", ret);
+	ret = recorder_set_state_changed_cb(recorder, _recorder_state_changed_cb , NULL);
+	ret = recorder_set_filename(recorder, "/mnt/nfs/test.3gp");
+	printf("recorder_set_filename ret = %x\n", ret);
+	ret = recorder_set_audio_encoder(recorder, RECORDER_AUDIO_CODEC_AAC);
+	printf("recorder_set_audio_encoder ret = %x\n", ret);
+	ret = recorder_set_video_encoder(recorder, RECORDER_VIDEO_CODEC_MPEG4);
+	printf("recorder_set_video_encoder ret = %x\n", ret);
+	ret = recorder_set_file_format(recorder, RECORDER_FILE_FORMAT_3GP);
+	printf("recorder_set_file_format ret = %x\n", ret);
+	ret = recorder_attr_set_slow_motion_rate(recorder, 0.5);
+	printf("recorder_attr_set_slow_motion_rate ret = %x\n", ret);
+	ret = recorder_prepare(recorder);
+	printf("recorder_prepare ret = %x\n", ret);
+	ret = recorder_start(recorder);
+	printf("recorder_start ret = %x\n", ret);
+	sleep(10);
+	ret = recorder_commit(recorder);
+	printf("recorder_commit ret = %x\n", ret);
+	ret = recorder_unprepare(recorder);
+	printf("recorder_unprepare ret = %x\n", ret);
+	ret = recorder_destroy(recorder);
+	printf("recorder_destroy ret = %x\n", ret);
+	return 0;
+}
+
+void _capturing_cb(camera_image_data_s* image, camera_image_data_s* postview, camera_image_data_s* thumbnail, void *user_data){
+	printf("capturing callback!\n");
+}
+
+void _capture_completed_cb(void *user_data){
+	printf("capture completed callback\n");
+}
+
+
+int recording_capture_test(){
+	camera_h camera;
+	recorder_h recorder;
+	int ret;
+	ret = camera_create(CAMERA_DEVICE_CAMERA0, &camera);
+	printf("camera_create ret = %x\n", ret);
+	camera_set_state_changed_cb(camera, _camera_state_changed_cb, NULL);
+	ret = recorder_create_videorecorder(camera, &recorder);
+	printf("recorder_create_videorecorder ret = %x\n", ret);
+	ret = recorder_set_state_changed_cb(recorder, _recorder_state_changed_cb , NULL);
+	ret = recorder_set_filename(recorder, "/mnt/nfs/test.3gp");
+	printf("recorder_set_filename ret = %x\n", ret);
+	ret = recorder_set_audio_encoder(recorder, RECORDER_AUDIO_CODEC_AAC);
+	printf("recorder_set_audio_encoder ret = %x\n", ret);
+	ret = recorder_set_video_encoder(recorder, RECORDER_VIDEO_CODEC_MPEG4);
+	printf("recorder_set_video_encoder ret = %x\n", ret);
+	ret = recorder_set_file_format(recorder, RECORDER_FILE_FORMAT_3GP);
+	printf("recorder_set_file_format ret = %x\n", ret);
+
+	camera_set_display(camera, CAMERA_DISPLAY_TYPE_X11, GET_DISPLAY(preview_win));
+	//camera_set_preview_resolution(camera, 640, 480);
+	//camera_set_capture_resolution(camera, 640, 480);
+
+	ret = recorder_prepare(recorder);
+	printf("recorder_prepare ret = %x\n", ret);
+	ret = recorder_start(recorder);
+	printf("recorder_start ret = %x\n", ret);
+	sleep(10);
+	ret = camera_start_capture(camera, _capturing_cb , _capture_completed_cb, NULL);
+	printf("camera_start_capture ret =%x\n", ret);
+	sleep(10);
+
+	ret = recorder_commit(recorder);
+	printf("recorder_commit ret = %x\n", ret);
+	ret = recorder_unprepare(recorder);
+	printf("recorder_unprepare ret = %x\n", ret);
+	ret = recorder_destroy(recorder);
+	printf("recorder_destroy ret = %x\n", ret);
+	return 0;
+}
+
+
+void _audio_stream_cb(void* stream, int size, audio_sample_type_e format, int channel, unsigned int timestamp, void *user_data){
+	printf("size = %d[%d]( %d )\n", size, format, timestamp);
+}
+
+int audio_stream_cb_test(){
+	recorder_h recorder;
+	int ret = 0;
+	ret = recorder_create_audiorecorder(&recorder);
+	printf(" create ret =%d\n", ret);
+	ret = recorder_set_audio_encoder(recorder, RECORDER_AUDIO_CODEC_AMR);
+	printf(" create2 ret =%d\n", ret);
+	ret = recorder_set_file_format(recorder, RECORDER_FILE_FORMAT_AMR);
+	printf(" create3 ret =%d\n", ret);
+	ret = recorder_set_filename(recorder, "/mnt/nfs/test.amr");
+	printf(" create4 ret =%d\n", ret);
+	ret = recorder_set_audio_stream_cb(recorder, _audio_stream_cb, NULL);
+	printf(" recorder_set_audio_stream_cb ret =%d\n", ret);
+	ret = recorder_prepare(recorder);
+	printf(" recorder_prepare ret =%d\n", ret);
+	ret = recorder_set_audio_stream_cb(recorder, _audio_stream_cb, NULL);
+	printf(" recorder_set_audio_stream_cb ret =%d\n", ret);
+	ret = recorder_start(recorder);
+	printf(" recorder_start ret =%d\n", ret);
+	sleep(10);
+	ret = recorder_commit(recorder);
+	printf(" recorder_commit ret =%d\n", ret);
+	return 0;
+}
 
 void* test_main(void *arg){
 	int ret = 0;
-	ret = recorder_encoder_test();
+	//ret = recorder_encoder_test();
 	/*
 	ret = recorder_attribute_test();
 	ret += recorder_state_change_test();
@@ -949,6 +1094,13 @@ void* test_main(void *arg){
 	ret += video_recorder_test();
 	ret = mm_test();
 	*/
+
+	//audio_level_test();
+	//slow_motion_test();
+	//recording_capture_test();
+	audio_stream_cb_test();
+
+	
 
 	if( ret == 0 )
 		printf("--------------RECORDER TEST ALL PASS--------------------------\n");
@@ -978,7 +1130,6 @@ int main(int argc, char ** argv)
 	//elm_win_fullscreen_set(mEvasWindow, 1);
 	
 	evas_object_color_set(mEvasWindow, 0,0,0,0);
-	elm_win_transparent_set(mEvasWindow, 1);
 	preview_win = elm_win_xwindow_get(mEvasWindow);
 
 	fprintf(stderr, "end of elm\n");

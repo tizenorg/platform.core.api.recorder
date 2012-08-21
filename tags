@@ -1,0 +1,322 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+-dbg-package	debian/rules	/^	dh_strip --dbg-package=capi-media-recorder-dbg$/;"	m
+-sourcedir	debian/rules	/^	dh_install --sourcedir=debian\/tmp$/;"	m
+CC	TC/testcase/Makefile	/^CC ?= gcc$/;"	m
+CFLAGS	TC/testcase/Makefile	/^CFLAGS = -I. `pkg-config --cflags $(PKGS)`$/;"	m
+CFLAGS	debian/rules	/^CFLAGS = -Wall -g$/;"	m
+CMAKE_BUILD_DIR	debian/rules	/^CMAKE_BUILD_DIR ?= $(CURDIR)\/cmake_build_tmp$/;"	m
+CMAKE_ROOT_DIR	debian/rules	/^CMAKE_ROOT_DIR ?= $(CURDIR)$/;"	m
+C_FILES	TC/testcase/Makefile	/^C_FILES = $(shell ls *.c)$/;"	m
+DLOG_D	src/recorder.c	38;"	d	file:
+DLOG_I	src/recorder.c	37;"	d	file:
+DLOG_V	src/recorder.c	36;"	d	file:
+GmainThread	TC/testcase/utc_media_recorder_working.c	/^gpointer GmainThread(gpointer data){$/;"	f
+LDFLAGS	TC/testcase/Makefile	/^LDFLAGS = `pkg-config --libs $(PKGS)`$/;"	m
+LOG_TAG	src/recorder.c	33;"	d	file:
+LOG_TAG	src/recorder.c	35;"	d	file:
+MY_ASSERT	TC/testcase/utc_media_recorder.c	21;"	d	file:
+MY_ASSERT	TC/testcase/utc_media_recorder_working.c	25;"	d	file:
+PKGS	TC/testcase/Makefile	/^PKGS = capi-media-camera capi-media-recorder dlog glib-2.0$/;"	m
+RECORDER_AUDIO_CODEC_AAC	include/recorder.h	/^	RECORDER_AUDIO_CODEC_AAC,			\/**< AAC codec *\/$/;"	e	enum:__anon9
+RECORDER_AUDIO_CODEC_AMR	include/recorder.h	/^	RECORDER_AUDIO_CODEC_AMR,			\/**< AMR codec *\/$/;"	e	enum:__anon9
+RECORDER_AUDIO_DEVICE_MIC	include/recorder.h	/^	RECORDER_AUDIO_DEVICE_MIC,	\/**< Mic device *\/$/;"	e	enum:__anon11
+RECORDER_AUDIO_DEVICE_MODEM	include/recorder.h	/^	RECORDER_AUDIO_DEVICE_MODEM,	\/**< Modem *\/$/;"	e	enum:__anon11
+RECORDER_ERROR_CLASS	include/recorder.h	30;"	d
+RECORDER_ERROR_DEVICE	include/recorder.h	/^		RECORDER_ERROR_DEVICE = RECORDER_ERROR_CLASS | 0x04,	        \/**< Device error *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_INVALID_OPERATION	include/recorder.h	/^		RECORDER_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,	\/**< Internal error *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_INVALID_PARAMETER	include/recorder.h	/^		RECORDER_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER, \/**< Invalid parameter *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_INVALID_STATE	include/recorder.h	/^		RECORDER_ERROR_INVALID_STATE = RECORDER_ERROR_CLASS | 0x02, 	\/**< Invalid state *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_NONE	include/recorder.h	/^		RECORDER_ERROR_NONE = TIZEN_ERROR_OK,                             \/**< Successful *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_OUT_OF_MEMORY	include/recorder.h	/^		RECORDER_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY ,	    \/**< Out of memory *\/$/;"	e	enum:__anon5
+RECORDER_ERROR_SOUND_POLICY	include/recorder.h	/^		RECORDER_ERROR_SOUND_POLICY = RECORDER_ERROR_CLASS | 0x06,	    \/**< Blocked by Audio Session Manager *\/$/;"	e	enum:__anon5
+RECORDER_FILE_FORMAT_3GP	include/recorder.h	/^        RECORDER_FILE_FORMAT_3GP,                     \/**< 3GP file format *\/$/;"	e	enum:__anon8
+RECORDER_FILE_FORMAT_AMR	include/recorder.h	/^        RECORDER_FILE_FORMAT_AMR,                     \/**< AMR file format *\/$/;"	e	enum:__anon8
+RECORDER_FILE_FORMAT_MP4	include/recorder.h	/^        RECORDER_FILE_FORMAT_MP4,                     \/**< MP4 file format *\/$/;"	e	enum:__anon8
+RECORDER_RECORDING_LIMIT_FREE_SPACE	include/recorder.h	/^	RECORDER_RECORDING_LIMIT_FREE_SPACE, 	\/**< No free space in storage  *\/$/;"	e	enum:__anon7
+RECORDER_RECORDING_LIMIT_SIZE	include/recorder.h	/^	RECORDER_RECORDING_LIMIT_SIZE, 			\/**< Size limit (kilo bytes [KB]) of recording file *\/$/;"	e	enum:__anon7
+RECORDER_RECORDING_LIMIT_TIME	include/recorder.h	/^	RECORDER_RECORDING_LIMIT_TIME, 			\/**< Time limit (second) of recording file *\/$/;"	e	enum:__anon7
+RECORDER_STATE_CREATED	include/recorder.h	/^	RECORDER_STATE_CREATED,				\/**< Recorder is created, but not prepared*\/$/;"	e	enum:__anon6
+RECORDER_STATE_NONE	include/recorder.h	/^	RECORDER_STATE_NONE,				\/**< Recorder is not created *\/$/;"	e	enum:__anon6
+RECORDER_STATE_PAUSED	include/recorder.h	/^	RECORDER_STATE_PAUSED,			    \/**< Recorder is paused while recording media*\/$/;"	e	enum:__anon6
+RECORDER_STATE_READY	include/recorder.h	/^	RECORDER_STATE_READY,			    \/**< Recorder is ready to record\\n  In case of video recoder, preview display will be shown *\/$/;"	e	enum:__anon6
+RECORDER_STATE_RECORDING	include/recorder.h	/^	RECORDER_STATE_RECORDING,	        \/**< Recorder is recording media*\/$/;"	e	enum:__anon6
+RECORDER_VIDEO_CODEC_H263	include/recorder.h	/^	RECORDER_VIDEO_CODEC_H263,			\/**< H263 codec *\/$/;"	e	enum:__anon10
+RECORDER_VIDEO_CODEC_H264	include/recorder.h	/^	RECORDER_VIDEO_CODEC_H264,			\/**< H264 codec *\/$/;"	e	enum:__anon10
+RECORDER_VIDEO_CODEC_MPEG4	include/recorder.h	/^	RECORDER_VIDEO_CODEC_MPEG4,		\/**< MPEG4 codec *\/$/;"	e	enum:__anon10
+TCS	TC/testcase/Makefile	/^TCS := $(shell ls -1 *.c | cut -d. -f1)$/;"	m
+_CAMERA_EVENT_TYPE_CAPTURE	src/recorder.c	/^	_CAMERA_EVENT_TYPE_CAPTURE,	$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_CAPTURE_COMPLETE	src/recorder.c	/^	_CAMERA_EVENT_TYPE_CAPTURE_COMPLETE,$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_ERROR	src/recorder.c	/^	_CAMERA_EVENT_TYPE_ERROR,		$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_FOCUS_CHANGE	src/recorder.c	/^	_CAMERA_EVENT_TYPE_FOCUS_CHANGE,	$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_NUM	src/recorder.c	/^	_CAMERA_EVENT_TYPE_NUM$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_PREVIEW	src/recorder.c	/^	_CAMERA_EVENT_TYPE_PREVIEW,$/;"	e	enum:__anon12	file:
+_CAMERA_EVENT_TYPE_STATE_CHANGE	src/recorder.c	/^	_CAMERA_EVENT_TYPE_STATE_CHANGE,$/;"	e	enum:__anon12	file:
+_RECORDER_EVENT_TYPE_NUM	include/recorder_private.h	/^	_RECORDER_EVENT_TYPE_NUM$/;"	e	enum:__anon3
+_RECORDER_EVENT_TYPE_RECORDING_LIMITED	include/recorder_private.h	/^	_RECORDER_EVENT_TYPE_RECORDING_LIMITED,	$/;"	e	enum:__anon3
+_RECORDER_EVENT_TYPE_RECORDING_STATUS	include/recorder_private.h	/^	_RECORDER_EVENT_TYPE_RECORDING_STATUS,$/;"	e	enum:__anon3
+_RECORDER_EVENT_TYPE_STATE_CHANGE	include/recorder_private.h	/^	_RECORDER_EVENT_TYPE_STATE_CHANGE,$/;"	e	enum:__anon3
+_RECORDER_TYPE_AUDIO	include/recorder_private.h	/^	_RECORDER_TYPE_AUDIO= 0,$/;"	e	enum:__anon4
+_RECORDER_TYPE_VIDEO	include/recorder_private.h	/^	_RECORDER_TYPE_VIDEO$/;"	e	enum:__anon4
+__TIZEN_MULTIMEDIA_RECORDER_H__	include/recorder.h	22;"	d
+__TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__	include/recorder_private.h	21;"	d
+_audio_encoder_cb	TC/testcase/utc_media_recorder_callback.c	/^bool _audio_encoder_cb(recorder_audio_codec_e codec , void *user_data){$/;"	f
+_audio_encoder_test_cb	TC/testcase/utc_media_recorder_working.c	/^bool _audio_encoder_test_cb(recorder_audio_codec_e codec, void *user_data){$/;"	f
+_audio_encoder_test_cb	test/multimedia_recorder_test.c	/^bool _audio_encoder_test_cb(recorder_audio_codec_e codec, void *user_data){$/;"	f
+_camera_event_e	src/recorder.c	/^}_camera_event_e;$/;"	t	typeref:enum:__anon12	file:
+_camera_s	src/recorder.c	/^typedef struct _camera_s{$/;"	s	file:
+_convert_recorder_error_code	src/recorder.c	/^int _convert_recorder_error_code(int code){$/;"	f
+_file_format_cb	TC/testcase/utc_media_recorder_callback.c	/^bool _file_format_cb(recorder_file_format_e format , void *user_data){$/;"	f
+_file_format_test_cb	TC/testcase/utc_media_recorder_working.c	/^bool _file_format_test_cb(recorder_file_format_e format, void *user_data){$/;"	f
+_file_format_test_cb	test/multimedia_recorder_test.c	/^bool _file_format_test_cb(recorder_file_format_e format, void *user_data){$/;"	f
+_limit_reached_cb	TC/testcase/utc_media_recorder_callback.c	/^void _limit_reached_cb(recorder_recording_limit_type_e type,  void *user_data){$/;"	f
+_recorder_event_e	include/recorder_private.h	/^}_recorder_event_e;$/;"	t	typeref:enum:__anon3
+_recorder_s	include/recorder_private.h	/^typedef struct _recorder_s{$/;"	s
+_recorder_state_convert	src/recorder.c	/^recorder_state_e _recorder_state_convert(MMCamcorderStateType mm_state )$/;"	f
+_recorder_type_e	include/recorder_private.h	/^}_recorder_type_e;$/;"	t	typeref:enum:__anon4
+_recording_limit_reached_cb	test/multimedia_recorder_test.c	/^void _recording_limit_reached_cb(recorder_recording_limit_type_e type, void *user_data){$/;"	f
+_recording_limited_reached_cb	TC/testcase/utc_media_recorder_working.c	/^void _recording_limited_reached_cb(recorder_recording_limit_type_e type, void *user_data){$/;"	f
+_recording_statis_cb	TC/testcase/utc_media_recorder_callback.c	/^void _recording_statis_cb(int elapsed_time, int file_size,  void *user_data){$/;"	f
+_recording_status_cb2	TC/testcase/utc_media_recorder_working.c	/^void _recording_status_cb2(int elapsed_time, int file_size, void *user_data){$/;"	f
+_recording_status_cb2	test/multimedia_recorder_test.c	/^void _recording_status_cb2(int elapsed_time, int file_size, void *user_data){$/;"	f
+_recording_status_test_cb	TC/testcase/utc_media_recorder_working.c	/^void _recording_status_test_cb(int elapsed_time, int file_size, void *user_data){$/;"	f
+_recording_status_test_cb	test/multimedia_recorder_test.c	/^void _recording_status_test_cb(int elapsed_time, int file_size, void *user_data){$/;"	f
+_state_change_test_cb	TC/testcase/utc_media_recorder_working.c	/^void _state_change_test_cb(recorder_state_e previous, recorder_state_e current, bool by_asm, void *user_data){$/;"	f
+_state_change_test_cb	test/multimedia_recorder_test.c	/^void _state_change_test_cb(recorder_state_e previous, recorder_state_e current, bool by_asm, void *user_data){$/;"	f
+_state_changed_cb	TC/testcase/utc_media_recorder_callback.c	/^void _state_changed_cb(recorder_state_e previous , recorder_state_e current , bool by_asm,  void *user_data)$/;"	f
+_video_encoder_cb	TC/testcase/utc_media_recorder_callback.c	/^bool _video_encoder_cb(recorder_video_codec_e codec ,  void *user_data){$/;"	f
+_video_encoder_test_cb	TC/testcase/utc_media_recorder_working.c	/^bool _video_encoder_test_cb(recorder_video_codec_e codec, void *user_data){$/;"	f
+_video_encoder_test_cb	test/multimedia_recorder_test.c	/^bool _video_encoder_test_cb(recorder_video_codec_e codec, void *user_data){$/;"	f
+audio_encoder_test	TC/testcase/utc_media_recorder_working.c	/^int audio_encoder_test(recorder_h recorder){$/;"	f
+audio_encoder_test	test/multimedia_recorder_test.c	/^int audio_encoder_test(recorder_h recorder){$/;"	f
+audioencoder_test_fail	TC/testcase/utc_media_recorder_working.c	/^int audioencoder_test_fail = 0;$/;"	v
+audioencoder_test_fail	test/multimedia_recorder_test.c	/^int audioencoder_test_fail = 0;$/;"	v
+camera	include/recorder_private.h	/^	camera_h camera;$/;"	m	struct:_recorder_s
+camera_s	src/recorder.c	/^} camera_s;$/;"	t	typeref:struct:_camera_s	file:
+cleanup	TC/testcase/utc_media_recorder.c	/^static void cleanup(void)$/;"	f	file:
+cleanup	TC/testcase/utc_media_recorder_callback.c	/^static void cleanup(void)$/;"	f	file:
+cleanup	TC/testcase/utc_media_recorder_lifecycle.c	/^static void cleanup(void)$/;"	f	file:
+cleanup	TC/testcase/utc_media_recorder_working.c	/^static void cleanup(void)$/;"	f	file:
+display_handle	src/recorder.c	/^	unsigned long display_handle;$/;"	m	struct:_camera_s	file:
+elapsed_time	TC/testcase/utc_media_recorder_working.c	/^	int elapsed_time;$/;"	m	struct:__anon2	file:
+elapsed_time	test/multimedia_recorder_test.c	/^	int elapsed_time;$/;"	m	struct:__anon14	file:
+event_thread	TC/testcase/utc_media_recorder_working.c	/^static GThread *event_thread;$/;"	v	file:
+file_size	TC/testcase/utc_media_recorder_working.c	/^	int file_size;$/;"	m	struct:__anon2	file:
+file_size	test/multimedia_recorder_test.c	/^	int file_size;$/;"	m	struct:__anon14	file:
+fileformat_test	TC/testcase/utc_media_recorder_working.c	/^int fileformat_test(recorder_h recorder){$/;"	f
+fileformat_test	test/multimedia_recorder_test.c	/^int fileformat_test(recorder_h recorder){$/;"	f
+fileformat_test_fail	TC/testcase/utc_media_recorder_working.c	/^int fileformat_test_fail = 0;$/;"	v
+fileformat_test_fail	test/multimedia_recorder_test.c	/^int fileformat_test_fail = 0;$/;"	v
+g_mainloop	TC/testcase/utc_media_recorder_working.c	/^static GMainLoop *g_mainloop = NULL;$/;"	v	file:
+iscalled	TC/testcase/utc_media_recorder_working.c	/^	bool iscalled;$/;"	m	struct:__anon1	file:
+iscalled	test/multimedia_recorder_test.c	/^	bool iscalled;$/;"	m	struct:__anon13	file:
+ispaused	TC/testcase/utc_media_recorder_working.c	/^	bool ispaused;$/;"	m	struct:__anon1	file:
+ispaused	test/multimedia_recorder_test.c	/^	bool ispaused;$/;"	m	struct:__anon13	file:
+isprepare	test/multimedia_recorder_test.c	/^	bool isprepare;$/;"	m	struct:__anon13	file:
+isready	TC/testcase/utc_media_recorder_working.c	/^	bool isready;$/;"	m	struct:__anon1	file:
+isrecording	TC/testcase/utc_media_recorder_working.c	/^	bool isrecording;$/;"	m	struct:__anon1	file:
+isrecording	test/multimedia_recorder_test.c	/^	bool isrecording;$/;"	m	struct:__anon13	file:
+mEvasWindow	test/multimedia_recorder_test.c	/^Evas_Object* mEvasWindow;$/;"	v
+mXwindow	test/multimedia_recorder_test.c	/^Ecore_X_Window mXwindow;	$/;"	v
+main	test/multimedia_recorder_test.c	/^int main(int argc, char ** argv)$/;"	f
+mm_handle	include/recorder_private.h	/^	MMHandleType mm_handle;$/;"	m	struct:_recorder_s
+mm_handle	src/recorder.c	/^	MMHandleType mm_handle;$/;"	m	struct:_camera_s	file:
+mm_recorder_msg_cb	src/recorder.c	/^int mm_recorder_msg_cb(int message, void *param, void *user_data){$/;"	f
+mm_test	test/multimedia_recorder_test.c	/^int mm_test(){$/;"	f
+origin_preview_format	include/recorder_private.h	/^	int origin_preview_format;$/;"	m	struct:_recorder_s
+preview_win	TC/testcase/utc_media_recorder_working.c	/^int preview_win = 0;	$/;"	v
+preview_win	test/multimedia_recorder_test.c	/^Ecore_X_Window preview_win;$/;"	v
+record_state_cb	TC/testcase/utc_media_recorder_working.c	/^void record_state_cb(recorder_state_e previous , recorder_state_e current , int by_asm, void *user_data){$/;"	f
+record_state_cb	test/multimedia_recorder_test.c	/^bool record_state_cb(recorder_state_e previous , recorder_state_e current , int by_asm, void *user_data){$/;"	f
+recorder	TC/testcase/utc_media_recorder.c	/^recorder_h recorder;$/;"	v
+recorder	TC/testcase/utc_media_recorder_callback.c	/^recorder_h recorder;$/;"	v
+recorder_attr_get_audio_device	src/recorder.c	/^int recorder_attr_get_audio_device(recorder_h recorder , recorder_audio_device_e *device){$/;"	f
+recorder_attr_get_audio_encoder_bitrate	src/recorder.c	/^int recorder_attr_get_audio_encoder_bitrate(recorder_h recorder,  int *bitrate){$/;"	f
+recorder_attr_get_audio_samplerate	src/recorder.c	/^int recorder_attr_get_audio_samplerate(recorder_h recorder, int *samplerate){$/;"	f
+recorder_attr_get_audio_volume	src/recorder.c	/^int recorder_attr_get_audio_volume(recorder_h recorder,  double *volume){$/;"	f
+recorder_attr_get_size_limit	src/recorder.c	/^int recorder_attr_get_size_limit(recorder_h recorder,  int *kbyte){$/;"	f
+recorder_attr_get_time_limit	src/recorder.c	/^int recorder_attr_get_time_limit(recorder_h recorder,  int *second){$/;"	f
+recorder_attr_get_video_encoder_bitrate	src/recorder.c	/^int recorder_attr_get_video_encoder_bitrate(recorder_h recorder,  int *bitrate){$/;"	f
+recorder_attr_set_audio_device	src/recorder.c	/^int recorder_attr_set_audio_device(recorder_h recorder , recorder_audio_device_e device){$/;"	f
+recorder_attr_set_audio_encoder_bitrate	src/recorder.c	/^int recorder_attr_set_audio_encoder_bitrate(recorder_h recorder,  int bitrate){$/;"	f
+recorder_attr_set_audio_samplerate	src/recorder.c	/^int recorder_attr_set_audio_samplerate(recorder_h recorder, int samplerate){$/;"	f
+recorder_attr_set_audio_volume	src/recorder.c	/^int recorder_attr_set_audio_volume(recorder_h recorder,  double volume){$/;"	f
+recorder_attr_set_size_limit	src/recorder.c	/^int recorder_attr_set_size_limit(recorder_h recorder,  int kbyte){$/;"	f
+recorder_attr_set_time_limit	src/recorder.c	/^int recorder_attr_set_time_limit(recorder_h recorder,  int second){$/;"	f
+recorder_attr_set_video_encoder_bitrate	src/recorder.c	/^int recorder_attr_set_video_encoder_bitrate(recorder_h recorder,  int bitrate){$/;"	f
+recorder_attribute_test	test/multimedia_recorder_test.c	/^int recorder_attribute_test(){$/;"	f
+recorder_audio_codec_e	include/recorder.h	/^} recorder_audio_codec_e;$/;"	t	typeref:enum:__anon9
+recorder_audio_device_e	include/recorder.h	/^} recorder_audio_device_e;$/;"	t	typeref:enum:__anon11
+recorder_cancel	src/recorder.c	/^int recorder_cancel( recorder_h recorder){$/;"	f
+recorder_commit	src/recorder.c	/^int recorder_commit( recorder_h recorder){$/;"	f
+recorder_create_audiorecorder	src/recorder.c	/^int recorder_create_audiorecorder( recorder_h* recorder){$/;"	f
+recorder_create_videorecorder	src/recorder.c	/^int recorder_create_videorecorder( camera_h camera, recorder_h* recorder){$/;"	f
+recorder_destroy	src/recorder.c	/^int recorder_destroy( recorder_h recorder){$/;"	f
+recorder_encoder_test	test/multimedia_recorder_test.c	/^int recorder_encoder_test(){$/;"	f
+recorder_error_e	include/recorder.h	/^} recorder_error_e;$/;"	t	typeref:enum:__anon5
+recorder_file_format_e	include/recorder.h	/^} recorder_file_format_e;$/;"	t	typeref:enum:__anon8
+recorder_foreach_supported_audio_encoder	src/recorder.c	/^int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_supported_audio_encoder_cb foreach_cb , void *user_data){$/;"	f
+recorder_foreach_supported_file_format	src/recorder.c	/^int recorder_foreach_supported_file_format(recorder_h recorder, recorder_supported_file_format_cb foreach_cb , void *user_data){$/;"	f
+recorder_foreach_supported_video_encoder	src/recorder.c	/^int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_supported_video_encoder_cb foreach_cb , void *user_data){$/;"	f
+recorder_get_audio_encoder	src/recorder.c	/^int recorder_get_audio_encoder(recorder_h recorder, recorder_audio_codec_e *codec){$/;"	f
+recorder_get_file_format	src/recorder.c	/^int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format){$/;"	f
+recorder_get_filename	src/recorder.c	/^int recorder_get_filename(recorder_h recorder,  char **filename){$/;"	f
+recorder_get_state	src/recorder.c	/^int recorder_get_state(recorder_h recorder, recorder_state_e * state){$/;"	f
+recorder_get_video_encoder	src/recorder.c	/^int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *codec){$/;"	f
+recorder_h	include/recorder.h	/^typedef struct recorder_s *recorder_h;$/;"	t	typeref:struct:recorder_s
+recorder_limit_cb_test	test/multimedia_recorder_test.c	/^int recorder_limit_cb_test(){$/;"	f
+recorder_pause	src/recorder.c	/^int recorder_pause( recorder_h recorder){$/;"	f
+recorder_prepare	src/recorder.c	/^int recorder_prepare( recorder_h recorder){$/;"	f
+recorder_recoding_status_cb_test	test/multimedia_recorder_test.c	/^int recorder_recoding_status_cb_test(){$/;"	f
+recorder_recording_limit_reached_cb	include/recorder.h	/^typedef void (*recorder_recording_limit_reached_cb)(recorder_recording_limit_type_e type, void *user_data);$/;"	t
+recorder_recording_limit_type_e	include/recorder.h	/^} recorder_recording_limit_type_e;$/;"	t	typeref:enum:__anon7
+recorder_recording_status_cb	include/recorder.h	/^typedef void (*recorder_recording_status_cb)(int elapsed_time, int file_size, void *user_data);$/;"	t
+recorder_s	include/recorder_private.h	/^} recorder_s;$/;"	t	typeref:struct:_recorder_s
+recorder_set_audio_encoder	src/recorder.c	/^int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e  codec){$/;"	f
+recorder_set_file_format	src/recorder.c	/^int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format){$/;"	f
+recorder_set_filename	src/recorder.c	/^int recorder_set_filename(recorder_h recorder,  const char *filename){$/;"	f
+recorder_set_recording_limit_reached_cb	src/recorder.c	/^int recorder_set_recording_limit_reached_cb(recorder_h recorder, recorder_recording_limit_reached_cb callback, void* user_data){$/;"	f
+recorder_set_recording_status_cb	src/recorder.c	/^int recorder_set_recording_status_cb(recorder_h recorder, recorder_recording_status_cb callback, void* user_data){$/;"	f
+recorder_set_state_changed_cb	src/recorder.c	/^int recorder_set_state_changed_cb(recorder_h recorder, recorder_state_changed_cb callback, void* user_data){$/;"	f
+recorder_set_video_encoder	src/recorder.c	/^int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e  codec){$/;"	f
+recorder_start	src/recorder.c	/^int recorder_start( recorder_h recorder){$/;"	f
+recorder_state_change_test	test/multimedia_recorder_test.c	/^int recorder_state_change_test(){$/;"	f
+recorder_state_changed_cb	include/recorder.h	/^typedef void (*recorder_state_changed_cb)(recorder_state_e previous , recorder_state_e current , bool by_policy, void *user_data);$/;"	t
+recorder_state_e	include/recorder.h	/^} recorder_state_e;$/;"	t	typeref:enum:__anon6
+recorder_supported_audio_encoder_cb	include/recorder.h	/^typedef bool (*recorder_supported_audio_encoder_cb)(recorder_audio_codec_e codec, void *user_data);$/;"	t
+recorder_supported_file_format_cb	include/recorder.h	/^typedef bool (*recorder_supported_file_format_cb)(recorder_file_format_e format, void *user_data);$/;"	t
+recorder_supported_video_encoder_cb	include/recorder.h	/^typedef bool (*recorder_supported_video_encoder_cb)(recorder_video_codec_e codec, void *user_data);$/;"	t
+recorder_unprepare	src/recorder.c	/^int recorder_unprepare( recorder_h recorder){$/;"	f
+recorder_unset_recording_limit_reached_cb	src/recorder.c	/^int recorder_unset_recording_limit_reached_cb(recorder_h recorder){$/;"	f
+recorder_unset_recording_status_cb	src/recorder.c	/^int recorder_unset_recording_status_cb(recorder_h recorder){$/;"	f
+recorder_unset_state_changed_cb	src/recorder.c	/^int recorder_unset_state_changed_cb(recorder_h recorder){$/;"	f
+recorder_video_codec_e	include/recorder.h	/^} recorder_video_codec_e;$/;"	t	typeref:enum:__anon10
+recording_audio_device_test	TC/testcase/utc_media_recorder_working.c	/^int recording_audio_device_test(recorder_h recorder)$/;"	f
+recording_audio_device_test	test/multimedia_recorder_test.c	/^int recording_audio_device_test(recorder_h recorder)$/;"	f
+recording_audio_encoder_bitrate_test	TC/testcase/utc_media_recorder_working.c	/^int recording_audio_encoder_bitrate_test(recorder_h recorder){$/;"	f
+recording_audio_encoder_bitrate_test	test/multimedia_recorder_test.c	/^int recording_audio_encoder_bitrate_test(recorder_h recorder){$/;"	f
+recording_limit_size_test	TC/testcase/utc_media_recorder_working.c	/^int recording_limit_size_test(recorder_h recorder){$/;"	f
+recording_result	TC/testcase/utc_media_recorder_working.c	/^} recording_result;$/;"	t	typeref:struct:__anon2	file:
+recording_result	test/multimedia_recorder_test.c	/^} recording_result;$/;"	t	typeref:struct:__anon14	file:
+recording_samplerate_test	TC/testcase/utc_media_recorder_working.c	/^int recording_samplerate_test(recorder_h recorder){$/;"	f
+recording_samplerate_test	test/multimedia_recorder_test.c	/^int recording_samplerate_test(recorder_h recorder){$/;"	f
+recording_size_limit_test	test/multimedia_recorder_test.c	/^int recording_size_limit_test(recorder_h recorder){$/;"	f
+recording_time_limit_test	TC/testcase/utc_media_recorder_working.c	/^int recording_time_limit_test(recorder_h recorder){$/;"	f
+recording_time_limit_test	test/multimedia_recorder_test.c	/^int recording_time_limit_test(recorder_h recorder){$/;"	f
+recording_video_encoder_bitrate_test	TC/testcase/utc_media_recorder_working.c	/^int recording_video_encoder_bitrate_test(recorder_h recorder){$/;"	f
+recording_video_encoder_bitrate_test	test/multimedia_recorder_test.c	/^int recording_video_encoder_bitrate_test(recorder_h recorder){$/;"	f
+startup	TC/testcase/utc_media_recorder.c	/^static void startup(void)$/;"	f	file:
+startup	TC/testcase/utc_media_recorder_callback.c	/^static void startup(void)$/;"	f	file:
+startup	TC/testcase/utc_media_recorder_lifecycle.c	/^static void startup(void)$/;"	f	file:
+startup	TC/testcase/utc_media_recorder_working.c	/^static void startup(void)$/;"	f	file:
+state	TC/testcase/utc_media_recorder_working.c	/^	recorder_state_e state;$/;"	m	struct:__anon1	file:
+state	include/recorder_private.h	/^	int state;$/;"	m	struct:_recorder_s
+state	src/recorder.c	/^	int state;$/;"	m	struct:_camera_s	file:
+state	test/multimedia_recorder_test.c	/^	recorder_state_e state;$/;"	m	struct:__anon13	file:
+state_change_data	TC/testcase/utc_media_recorder_working.c	/^} state_change_data;$/;"	t	typeref:struct:__anon1	file:
+state_change_data	test/multimedia_recorder_test.c	/^} state_change_data;$/;"	t	typeref:struct:__anon13	file:
+test_main	test/multimedia_recorder_test.c	/^void* test_main(void *arg){$/;"	f
+tet_cleanup	TC/testcase/utc_media_recorder.c	/^void (*tet_cleanup)(void) = cleanup;$/;"	v
+tet_cleanup	TC/testcase/utc_media_recorder_callback.c	/^void (*tet_cleanup)(void) = cleanup;$/;"	v
+tet_cleanup	TC/testcase/utc_media_recorder_lifecycle.c	/^void (*tet_cleanup)(void) = cleanup;$/;"	v
+tet_cleanup	TC/testcase/utc_media_recorder_working.c	/^void (*tet_cleanup)(void) = cleanup;$/;"	v
+tet_startup	TC/testcase/utc_media_recorder.c	/^void (*tet_startup)(void) = startup;$/;"	v
+tet_startup	TC/testcase/utc_media_recorder_callback.c	/^void (*tet_startup)(void) = startup;$/;"	v
+tet_startup	TC/testcase/utc_media_recorder_lifecycle.c	/^void (*tet_startup)(void) = startup;$/;"	v
+tet_startup	TC/testcase/utc_media_recorder_working.c	/^void (*tet_startup)(void) = startup;$/;"	v
+tet_testlist	TC/testcase/utc_media_recorder.c	/^struct tet_testlist tet_testlist[] = { $/;"	v	typeref:struct:tet_testlist
+tet_testlist	TC/testcase/utc_media_recorder_callback.c	/^struct tet_testlist tet_testlist[] = {$/;"	v	typeref:struct:tet_testlist
+tet_testlist	TC/testcase/utc_media_recorder_lifecycle.c	/^struct tet_testlist tet_testlist[] = {$/;"	v	typeref:struct:tet_testlist
+tet_testlist	TC/testcase/utc_media_recorder_working.c	/^struct tet_testlist tet_testlist[] = {$/;"	v	typeref:struct:tet_testlist
+type	include/recorder_private.h	/^	_recorder_type_e  type;$/;"	m	struct:_recorder_s
+user_cb	include/recorder_private.h	/^	void* user_cb[_RECORDER_EVENT_TYPE_NUM];$/;"	m	struct:_recorder_s
+user_cb	src/recorder.c	/^	void* user_cb[_CAMERA_EVENT_TYPE_NUM];$/;"	m	struct:_camera_s	file:
+user_data	include/recorder_private.h	/^	void* user_data[_RECORDER_EVENT_TYPE_NUM];$/;"	m	struct:_recorder_s
+user_data	src/recorder.c	/^	void* user_data[_CAMERA_EVENT_TYPE_NUM];$/;"	m	struct:_camera_s	file:
+utc_media_recorder_attr_get_audio_device_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_device_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_audio_device_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_device_p(void)$/;"	f	file:
+utc_media_recorder_attr_get_audio_encoder_bitrate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_encoder_bitrate_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_audio_encoder_bitrate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_encoder_bitrate_p(void)$/;"	f	file:
+utc_media_recorder_attr_get_audio_samplerate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_samplerate_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_audio_samplerate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_audio_samplerate_p(void)$/;"	f	file:
+utc_media_recorder_attr_get_size_limit_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_size_limit_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_size_limit_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_size_limit_p(void)$/;"	f	file:
+utc_media_recorder_attr_get_time_limit_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_time_limit_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_time_limit_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_time_limit_p(void)$/;"	f	file:
+utc_media_recorder_attr_get_video_encoder_bitrate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_video_encoder_bitrate_n(void)$/;"	f	file:
+utc_media_recorder_attr_get_video_encoder_bitrate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_get_video_encoder_bitrate_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_device_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_device_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_device_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_device_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_encoder_bitrate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_encoder_bitrate_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_encoder_bitrate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_encoder_bitrate_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_samplerate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_samplerate_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_audio_samplerate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_audio_samplerate_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_size_limit_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_size_limit_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_size_limit_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_size_limit_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_time_limit_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_time_limit_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_time_limit_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_time_limit_p(void)$/;"	f	file:
+utc_media_recorder_attr_set_video_encoder_bitrate_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_video_encoder_bitrate_n(void)$/;"	f	file:
+utc_media_recorder_attr_set_video_encoder_bitrate_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_attr_set_video_encoder_bitrate_p(void)$/;"	f	file:
+utc_media_recorder_attribute_test	TC/testcase/utc_media_recorder_working.c	/^void utc_media_recorder_attribute_test(void){$/;"	f
+utc_media_recorder_cancel_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_cancel_n(void)$/;"	f	file:
+utc_media_recorder_cancel_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_cancel_p(void)$/;"	f	file:
+utc_media_recorder_commit_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_commit_n(void)$/;"	f	file:
+utc_media_recorder_commit_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_commit_p(void)$/;"	f	file:
+utc_media_recorder_create_audiorecorder_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_create_audiorecorder_n(void)$/;"	f	file:
+utc_media_recorder_create_audiorecorder_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_create_audiorecorder_p(void)$/;"	f	file:
+utc_media_recorder_create_videorecorder_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_create_videorecorder_n(void)$/;"	f	file:
+utc_media_recorder_create_videorecorder_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_create_videorecorder_p(void)$/;"	f	file:
+utc_media_recorder_destroy_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_destroy_n(void)$/;"	f	file:
+utc_media_recorder_destroy_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_destroy_p(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_audio_encoder_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_audio_encoder_n(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_audio_encoder_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_audio_encoder_p(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_file_format_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_file_format_n(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_file_format_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_file_format_p(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_video_encoder_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_video_encoder_n(void)$/;"	f	file:
+utc_media_recorder_foreach_supported_video_encoder_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_foreach_supported_video_encoder_p(void)$/;"	f	file:
+utc_media_recorder_get_audio_encoder_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_audio_encoder_n(void)$/;"	f	file:
+utc_media_recorder_get_audio_encoder_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_audio_encoder_p(void)$/;"	f	file:
+utc_media_recorder_get_file_format_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_file_format_n(void)$/;"	f	file:
+utc_media_recorder_get_file_format_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_file_format_p(void)$/;"	f	file:
+utc_media_recorder_get_video_encoder_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_video_encoder_n(void)$/;"	f	file:
+utc_media_recorder_get_video_encoder_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_get_video_encoder_p(void)$/;"	f	file:
+utc_media_recorder_limit_cb_test	TC/testcase/utc_media_recorder_working.c	/^void utc_media_recorder_limit_cb_test(void){$/;"	f
+utc_media_recorder_pause_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_pause_n(void)$/;"	f	file:
+utc_media_recorder_pause_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_pause_p(void)$/;"	f	file:
+utc_media_recorder_ready_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_ready_n(void)$/;"	f	file:
+utc_media_recorder_ready_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_ready_p(void)$/;"	f	file:
+utc_media_recorder_recoding_status_cb_test	TC/testcase/utc_media_recorder_working.c	/^void utc_media_recorder_recoding_status_cb_test(void){$/;"	f
+utc_media_recorder_set_audio_encoder_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_audio_encoder_n(void)$/;"	f	file:
+utc_media_recorder_set_audio_encoder_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_audio_encoder_p(void)$/;"	f	file:
+utc_media_recorder_set_file_format_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_file_format_n(void)$/;"	f	file:
+utc_media_recorder_set_file_format_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_file_format_p(void)$/;"	f	file:
+utc_media_recorder_set_filename_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_filename_n(void)$/;"	f	file:
+utc_media_recorder_set_filename_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_filename_p(void)$/;"	f	file:
+utc_media_recorder_set_recording_limit_reached_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_recording_limit_reached_cb_n(void)$/;"	f	file:
+utc_media_recorder_set_recording_limit_reached_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_recording_limit_reached_cb_p(void)$/;"	f	file:
+utc_media_recorder_set_recording_status_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_recording_status_cb_n(void)$/;"	f	file:
+utc_media_recorder_set_recording_status_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_recording_status_cb_p(void)$/;"	f	file:
+utc_media_recorder_set_state_changed_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_state_changed_cb_n(void)$/;"	f	file:
+utc_media_recorder_set_state_changed_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_set_state_changed_cb_p(void)$/;"	f	file:
+utc_media_recorder_set_video_encoder_n	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_video_encoder_n(void)$/;"	f	file:
+utc_media_recorder_set_video_encoder_p	TC/testcase/utc_media_recorder.c	/^static void utc_media_recorder_set_video_encoder_p(void)$/;"	f	file:
+utc_media_recorder_start_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_start_n(void)$/;"	f	file:
+utc_media_recorder_start_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_start_p(void)$/;"	f	file:
+utc_media_recorder_state_change_test	TC/testcase/utc_media_recorder_working.c	/^void utc_media_recorder_state_change_test(void){$/;"	f
+utc_media_recorder_unready_n	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_unready_n(void)$/;"	f	file:
+utc_media_recorder_unready_p	TC/testcase/utc_media_recorder_lifecycle.c	/^static void utc_media_recorder_unready_p(void)$/;"	f	file:
+utc_media_recorder_unset_recording_limit_reached_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_recording_limit_reached_cb_n(void)$/;"	f	file:
+utc_media_recorder_unset_recording_limit_reached_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_recording_limit_reached_cb_p(void)$/;"	f	file:
+utc_media_recorder_unset_recording_status_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_recording_status_cb_n(void)$/;"	f	file:
+utc_media_recorder_unset_recording_status_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_recording_status_cb_p(void)$/;"	f	file:
+utc_media_recorder_unset_state_changed_cb_n	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_state_changed_cb_n(void)$/;"	f	file:
+utc_media_recorder_unset_state_changed_cb_p	TC/testcase/utc_media_recorder_callback.c	/^static void utc_media_recorder_unset_state_changed_cb_p(void)$/;"	f	file:
+video_encoder_test	TC/testcase/utc_media_recorder_working.c	/^int video_encoder_test(recorder_h recorder){$/;"	f
+video_encoder_test	test/multimedia_recorder_test.c	/^int video_encoder_test(recorder_h recorder){$/;"	f
+video_recorder_test	test/multimedia_recorder_test.c	/^int video_recorder_test(){$/;"	f
+videoencoder_test_fail	TC/testcase/utc_media_recorder_working.c	/^int videoencoder_test_fail = 0;$/;"	v
+videoencoder_test_fail	test/multimedia_recorder_test.c	/^int videoencoder_test_fail = 0;$/;"	v
