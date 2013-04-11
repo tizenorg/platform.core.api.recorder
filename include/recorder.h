@@ -1223,6 +1223,32 @@ int recorder_attr_set_recording_flip(recorder_h recorder, recorder_flip_e flip);
 int recorder_attr_get_recording_flip(recorder_h recorder, recorder_flip_e *flip);
 
 /**
+ * @brief Sets the camera orientation in video metadata tag.
+ *
+ * @param[in]	camera	The handle to the camera
+ * @param[in]	orientation The information of the video orientation
+ * @return      0 on success, otherwise a negative error value.
+ * @retval      #CAMERA_ERROR_NONE Successful
+ * @retval      #CAMERA_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see	recorder_attr_get_orientation_tag()
+ */
+int recorder_attr_set_orientation_tag(recorder_h recorder,  recorder_rotation_e orientation);
+
+/**
+ * @brief Gets the camera orientation in video metadata tag.
+ *
+ * @param[in]	camera	The handle to the camera
+ * @param[out]  orientation The information of the video orientation
+ * @return      0 on success, otherwise a negative error value.
+ * @retval      #CAMERA_ERROR_NONE Successful
+ * @retval      #CAMERA_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see	recorder_attr_set_orientation_tag()
+ */
+int recorder_attr_get_orientation_tag(recorder_h recorder, recorder_rotation_e *orientation);
+
+/**
  * @}
  */
 

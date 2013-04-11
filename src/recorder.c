@@ -1235,3 +1235,18 @@ int recorder_attr_get_recording_flip(recorder_h recorder, recorder_flip_e *flip)
 	int ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, "camcorder-flip" , flip, NULL);
 	return  __convert_recorder_error_code(__func__, ret);
 }
+
+int recorder_attr_set_orientation_tag(recorder_h recorder,  recorder_rotation_e orientation){
+	if( recorder == NULL ) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	if((orientation < RECORDER_ROTATION_NONE) || ( orientation > RECORDER_ROTATION_270)) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	recorder_s * handle = (recorder_s*)recorder;
+	int ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_TAG_VIDEO_ORIENTATION  , orientation, NULL);
+	return __convert_recorder_error_code(__func__, ret);
+}
+
+int  recorder_attr_get_orientation_tag(recorder_h recorder, recorder_rotation_e *orientation){
+	if( recorder == NULL || orientation == NULL ) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	recorder_s * handle = (recorder_s*)recorder;
+	int ret = mm_camcorder_get_attributes(handle->mm_handle ,NULL, MMCAM_TAG_VIDEO_ORIENTATION  , orientation, NULL);
+	return __convert_recorder_error_code(__func__, ret);
+}
