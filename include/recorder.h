@@ -49,14 +49,16 @@ typedef struct recorder_s *recorder_h;
  */
 typedef enum
 {
-		RECORDER_ERROR_NONE = TIZEN_ERROR_NONE,                             /**< Successful */
-		RECORDER_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER, /**< Invalid parameter */
-		RECORDER_ERROR_INVALID_STATE = RECORDER_ERROR_CLASS | 0x02, 	/**< Invalid state */
-		RECORDER_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY ,	    /**< Out of memory */
-		RECORDER_ERROR_DEVICE = RECORDER_ERROR_CLASS | 0x04,	        /**< Device error */
-		RECORDER_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,	/**< Internal error */
-		RECORDER_ERROR_SOUND_POLICY = RECORDER_ERROR_CLASS | 0x06,	    /**< Blocked by Audio Session Manager */
-		RECORDER_ERROR_SECURITY_RESTRICTED = RECORDER_ERROR_CLASS | 0x07,    /**< Restricted by security system policy */
+	RECORDER_ERROR_NONE = TIZEN_ERROR_NONE,                                 /**< Successful */
+	RECORDER_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER,       /**< Invalid parameter */
+	RECORDER_ERROR_INVALID_STATE = RECORDER_ERROR_CLASS | 0x02,             /**< Invalid state */
+	RECORDER_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY ,              /**< Out of memory */
+	RECORDER_ERROR_DEVICE = RECORDER_ERROR_CLASS | 0x04,                    /**< Device error */
+	RECORDER_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,       /**< Internal error */
+	RECORDER_ERROR_SOUND_POLICY = RECORDER_ERROR_CLASS | 0x06,              /**< Blocked by Audio Session Manager */
+	RECORDER_ERROR_SECURITY_RESTRICTED = RECORDER_ERROR_CLASS | 0x07,       /**< Restricted by security system policy */
+	RECORDER_ERROR_ESD = RECORDER_ERROR_CLASS | 0x0a,                       /**< ESD situation */
+	RECORDER_ERROR_OUT_OF_STORAGE = RECORDER_ERROR_CLASS | 0x0b,            /**< Out of storage */
 } recorder_error_e;
 
 /**
@@ -91,6 +93,7 @@ typedef enum
         RECORDER_FILE_FORMAT_AMR,                     /**< AMR file format */
         RECORDER_FILE_FORMAT_ADTS,                   /**< ADTS file format */
         RECORDER_FILE_FORMAT_WAV,                    /**< WAV file format */
+        RECORDER_FILE_FORMAT_OGG,                    /**< OGG file format */
 } recorder_file_format_e;
 
 

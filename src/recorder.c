@@ -106,7 +106,6 @@ static int __convert_recorder_error_code(const char *func, int code){
 		case MM_ERROR_CAMCORDER_DEVICE_OPEN :
 		case MM_ERROR_CAMCORDER_DEVICE_IO :
 		case MM_ERROR_CAMCORDER_DEVICE_TIMEOUT	:
-		case MM_ERROR_CAMCORDER_DEVICE_REG_TROUBLE :
 		case MM_ERROR_CAMCORDER_DEVICE_WRONG_JPEG	 :
 		case MM_ERROR_CAMCORDER_DEVICE_LACK_BUFFER :
 			ret = RECORDER_ERROR_DEVICE;
@@ -152,6 +151,16 @@ static int __convert_recorder_error_code(const char *func, int code){
 		case MM_ERROR_POLICY_RESTRICTED:
 			ret = RECORDER_ERROR_SECURITY_RESTRICTED;
 			errorstr = "ERROR_RESTRICTED";
+			break;
+
+		case MM_ERROR_CAMCORDER_DEVICE_REG_TROUBLE:
+			ret = RECORDER_ERROR_ESD;
+			errorstr = "ERROR_ESD";
+			break;
+
+		case MM_ERROR_OUT_OF_STORAGE:
+			ret = RECORDER_ERROR_OUT_OF_STORAGE;
+			errorstr = "OUT_OF_STORAGE";
 			break;
 
 		default:
@@ -274,7 +283,6 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 			switch( errorcode ){
 				case MM_ERROR_CAMCORDER_DEVICE :
 				case MM_ERROR_CAMCORDER_DEVICE_TIMEOUT :
-				case MM_ERROR_CAMCORDER_DEVICE_REG_TROUBLE :
 				case MM_ERROR_CAMCORDER_DEVICE_WRONG_JPEG :
 					recorder_error = RECORDER_ERROR_DEVICE;
 					break;
@@ -297,6 +305,12 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 				case MM_ERROR_CAMCORDER_LOW_MEMORY :
 				case MM_ERROR_CAMCORDER_MNOTE_MALLOC :
 					recorder_error = RECORDER_ERROR_OUT_OF_MEMORY;
+					break;
+				case MM_ERROR_CAMCORDER_DEVICE_REG_TROUBLE:
+					recorder_error = RECORDER_ERROR_ESD;
+					break;
+				case MM_ERROR_OUT_OF_STORAGE:
+					recorder_error = RECORDER_ERROR_OUT_OF_STORAGE;
 					break;
 			}
 			if( recorder_error != 0 && handle->user_cb[_RECORDER_EVENT_TYPE_ERROR] )
@@ -603,22 +617,30 @@ int recorder_get_filename(recorder_h recorder,  char **filename){
 }
 
 
-int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format){
-	
-	if( recorder == NULL) return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);		
+int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
+{
 	int ret;
-	int format_table[5] = { MM_FILE_FORMAT_3GP ,  // RECORDER_FILE_FORMAT_3GP,
-											  MM_FILE_FORMAT_MP4 , //RECORDER_FILE_FORMAT_MP4,
-											  MM_FILE_FORMAT_AMR, //RECORDER_FILE_FORMAT_AMR,
-											  MM_FILE_FORMAT_AAC, //RECORDER_FILE_FORMAT_ADTS
-											  MM_FILE_FORMAT_WAV //RECORDER_FILE_FORMAT_WAV
-											};
+	int format_table[6] = { MM_FILE_FORMAT_3GP, //RECORDER_FILE_FORMAT_3GP
+	                        MM_FILE_FORMAT_MP4, //RECORDER_FILE_FORMAT_MP4
+	                        MM_FILE_FORMAT_AMR, //RECORDER_FILE_FORMAT_AMR
+	                        MM_FILE_FORMAT_AAC, //RECORDER_FILE_FORMAT_ADTS
+	                        MM_FILE_FORMAT_WAV, //RECORDER_FILE_FORMAT_WAV
+	                        MM_FILE_FORMAT_OGG  //RECORDER_FILE_FORMAT_OGG
+	};
+	recorder_s *handle = (recorder_s *)recorder;
 
-	if( format < RECORDER_FILE_FORMAT_3GP || format > RECORDER_FILE_FORMAT_WAV )
+	if (handle == NULL) {
+		return __convert_recorder_error_code(__func__, RECORDER_ERROR_INVALID_PARAMETER);
+	}
+
+	if (format < RECORDER_FILE_FORMAT_3GP || format > RECORDER_FILE_FORMAT_OGG) {
 		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
 
-	recorder_s * handle = (recorder_s*)recorder;
-	ret = mm_camcorder_set_attributes(handle->mm_handle ,NULL, MMCAM_FILE_FORMAT  , format_table[format], NULL);
+	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL,
+	                                  MMCAM_FILE_FORMAT, format_table[format],
+	                                  NULL);
+
 	return __convert_recorder_error_code(__func__, ret);
 }
 
@@ -648,6 +670,9 @@ int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format
 				break;
 			case MM_FILE_FORMAT_WAV:
 				*format = RECORDER_FILE_FORMAT_WAV;
+				break;
+			case MM_FILE_FORMAT_OGG:
+				*format = RECORDER_FILE_FORMAT_OGG;
 				break;
 			default :
 				ret = MM_ERROR_CAMCORDER_INTERNAL;
