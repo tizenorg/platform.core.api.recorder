@@ -1,6 +1,6 @@
 Name:       capi-media-recorder
 Summary:    A Recorder library in Tizen C API
-Version:    0.1.2
+Version:    0.1.3
 Release:    0
 Group:      libdevel
 License:    Apache-2.0
@@ -8,6 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(mm-camcorder)
+BuildRequires:  pkgconfig(audio-session-mgr)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-media-camera)
 BuildRequires:  pkgconfig(capi-media-audio-io)

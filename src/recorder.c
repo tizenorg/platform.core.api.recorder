@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mm.h>
+#include <audio-session-manager-types.h>
 #include <mm_camcorder.h>
 #include <mm_types.h>
 #include <math.h>
@@ -79,8 +80,8 @@ static int __convert_recorder_error_code(const char *func, int code){
 	{
 		case RECORDER_ERROR_INVALID_PARAMETER:
 			ret = RECORDER_ERROR_INVALID_PARAMETER;
-			errorstr = "INVALID_PARAMETER";			
-			break;			
+			errorstr = "INVALID_PARAMETER";
+			break;
 		case MM_ERROR_NONE:
 			ret = RECORDER_ERROR_NONE;
 			errorstr = "ERROR_NONE";
@@ -92,24 +93,24 @@ static int __convert_recorder_error_code(const char *func, int code){
 		case MM_ERROR_COMMON_OUT_OF_RANGE :
 		case MM_ERROR_COMMON_ATTR_NOT_EXIST :
 			ret = RECORDER_ERROR_INVALID_PARAMETER;
-			errorstr = "INVALID_PARAMETER";			
+			errorstr = "INVALID_PARAMETER";
 			break;
 		case MM_ERROR_CAMCORDER_NOT_INITIALIZED :
 		case MM_ERROR_CAMCORDER_INVALID_STATE :
 			ret = RECORDER_ERROR_INVALID_STATE;
-			errorstr = "INVALID_STATE";			
+			errorstr = "INVALID_STATE";
 			break;
 
 		case MM_ERROR_CAMCORDER_DEVICE :
 		case MM_ERROR_CAMCORDER_DEVICE_NOT_FOUND :
-		case MM_ERROR_CAMCORDER_DEVICE_BUSY	:
+		case MM_ERROR_CAMCORDER_DEVICE_BUSY :
 		case MM_ERROR_CAMCORDER_DEVICE_OPEN :
 		case MM_ERROR_CAMCORDER_DEVICE_IO :
 		case MM_ERROR_CAMCORDER_DEVICE_TIMEOUT	:
 		case MM_ERROR_CAMCORDER_DEVICE_WRONG_JPEG	 :
 		case MM_ERROR_CAMCORDER_DEVICE_LACK_BUFFER :
 			ret = RECORDER_ERROR_DEVICE;
-			errorstr = "ERROR_DEVICE";			
+			errorstr = "ERROR_DEVICE";
 			break;
 
 		case MM_ERROR_CAMCORDER_GST_CORE :
@@ -127,7 +128,7 @@ static int __convert_recorder_error_code(const char *func, int code){
 		case MM_ERROR_CAMCORDER_INTERNAL :
 		case MM_ERROR_CAMCORDER_NOT_SUPPORTED :
 		case MM_ERROR_CAMCORDER_RESPONSE_TIMEOUT :
-		case MM_ERROR_CAMCORDER_CMD_IS_RUNNING :	
+		case MM_ERROR_CAMCORDER_CMD_IS_RUNNING :
 		case MM_ERROR_CAMCORDER_DSP_FAIL :
 		case MM_ERROR_CAMCORDER_AUDIO_EMPTY :
 		case MM_ERROR_CAMCORDER_CREATE_CONFIGURE :
@@ -135,17 +136,27 @@ static int __convert_recorder_error_code(const char *func, int code){
 		case MM_ERROR_CAMCORDER_DISPLAY_DEVICE_OFF :
 		case MM_ERROR_CAMCORDER_INVALID_CONDITION :
 			ret = RECORDER_ERROR_INVALID_OPERATION;
-			errorstr = "INVALID_OPERATION";			
+			errorstr = "INVALID_OPERATION";
 			break;
 		case MM_ERROR_CAMCORDER_RESOURCE_CREATION :
-		case MM_ERROR_COMMON_OUT_OF_MEMORY:	
+		case MM_ERROR_COMMON_OUT_OF_MEMORY:
 			ret = RECORDER_ERROR_OUT_OF_MEMORY;
-			errorstr = "OUT_OF_MEMORY";			
+			errorstr = "OUT_OF_MEMORY";
 			break;
 
 		case MM_ERROR_POLICY_BLOCKED:
 			ret = RECORDER_ERROR_SOUND_POLICY;
-			errorstr = "ERROR_SOUND_POLICY";			
+			errorstr = "ERROR_SOUND_POLICY";
+			break;
+
+		case MM_ERROR_POLICY_BLOCKED_BY_CALL:
+			ret = RECORDER_ERROR_SOUND_POLICY_BY_CALL;
+			errorstr = "ERROR_SOUND_POLICY_BY_CALL";
+			break;
+
+		case MM_ERROR_POLICY_BLOCKED_BY_ALARM:
+			ret = RECORDER_ERROR_SOUND_POLICY_BY_ALARM;
+			errorstr = "ERROR_SOUND_POLICY_BY_ALARM";
 			break;
 
 		case MM_ERROR_POLICY_RESTRICTED:
@@ -220,10 +231,26 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data){
 				previous_state = handle->state;
 				handle->state = __recorder_state_convert(m->state.current);
 				recorder_policy_e policy = RECORDER_POLICY_NONE;
-				if(message == MM_MESSAGE_CAMCORDER_STATE_CHANGED_BY_ASM )
-					policy = RECORDER_POLICY_SOUND;
-				else if( message == MM_MESSAGE_CAMCORDER_STATE_CHANGED_BY_SECURITY )
+				if (message == MM_MESSAGE_CAMCORDER_STATE_CHANGED_BY_ASM) {
+					switch (m->state.code) {
+					case ASM_EVENT_SOURCE_CALL_START:
+						policy = RECORDER_POLICY_SOUND_BY_CALL;
+						LOGE("RECORDER_POLICY_SOUND_BY_CALL");
+						break;
+					case ASM_EVENT_SOURCE_ALARM_START:
+					case ASM_EVENT_SOURCE_ALARM_END:
+						policy = RECORDER_POLICY_SOUND_BY_ALARM;
+						LOGE("RECORDER_POLICY_SOUND_BY_ALARM");
+						break;
+					default:
+						policy = RECORDER_POLICY_SOUND;
+						LOGE("RECORDER_POLICY_SOUND");
+						break;
+					}
+				} else if (message == MM_MESSAGE_CAMCORDER_STATE_CHANGED_BY_SECURITY) {
 					policy = RECORDER_POLICY_SECURITY;
+					LOGE("RECORDER_POLICY_SECURITY");
+				}
 
 				if( previous_state != handle->state && handle->user_cb[_RECORDER_EVENT_TYPE_STATE_CHANGE] ){
 					((recorder_state_changed_cb)handle->user_cb[_RECORDER_EVENT_TYPE_STATE_CHANGE])(previous_state, handle->state, policy , handle->user_data[_RECORDER_EVENT_TYPE_STATE_CHANGE]);

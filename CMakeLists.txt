@@ -23,7 +23,7 @@ SET(service "media")
 SET(submodule "recorder")
 
 # for package file
-SET(dependents "dlog mm-camcorder capi-media-camera capi-media-audio-io")
+SET(dependents "dlog mm-camcorder capi-media-camera capi-media-audio-io audio-session-mgr")
 SET(pc_dependents "capi-base-common capi-media-camera capi-media-audio-io")
 
 SET(fw_name "${project_prefix}-${service}-${submodule}")
