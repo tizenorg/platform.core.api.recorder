@@ -1,6 +1,14 @@
 Code-Review+2: Ryan Ware <ware@linux.intel.com>
 Verified+1: Ryan Ware <ware@linux.intel.com>
 Submitted-by: Ryan Ware <ware@linux.intel.com>
+Submitted-at: Fri, 27 Sep 2013 11:05:10 -0800
+Reviewed-on: https://review.tizen.org/gerrit/10262
+Project: platform/core/api/recorder
+Branch: refs/heads/tizen
+
+Code-Review+2: Ryan Ware <ware@linux.intel.com>
+Verified+1: Ryan Ware <ware@linux.intel.com>
+Submitted-by: Ryan Ware <ware@linux.intel.com>
 Submitted-at: Fri, 27 Sep 2013 12:05:10 -0700
 Reviewed-on: https://review.tizen.org/gerrit/10262
 Project: platform/core/api/recorder
