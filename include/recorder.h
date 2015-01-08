@@ -61,6 +61,8 @@ typedef enum
 	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM */
 	RECORDER_ERROR_ESD = RECORDER_ERROR_CLASS | 0x0a,                       /**< ESD situation */
 	RECORDER_ERROR_OUT_OF_STORAGE = RECORDER_ERROR_CLASS | 0x0b,            /**< Out of storage */
+	RECORDER_ERROR_PERMISSION_DENIED = TIZEN_ERROR_PERMISSION_DENIED,       /**< The access to the resources can not be granted */
+	RECORDER_ERROR_NOT_SUPPORTED         = TIZEN_ERROR_NOT_SUPPORTED,       /**< The feature is not supported */
 } recorder_error_e;
 
 /**
@@ -248,6 +250,18 @@ typedef void (*recorder_interrupted_cb)(recorder_policy_e policy, recorder_state
  * @see recorder_set_audio_stream_cb()
  */
 typedef void (*recorder_audio_stream_cb)(void* stream, int size, audio_sample_type_e format, int channel, unsigned int timestamp, void *user_data);
+
+/**
+ * @brief Called once for each supported video resolution.
+ * @since_tizen 2.3
+ * @param[in] width         The video image width
+ * @param[in] height        The video image height
+ * @param[in] user_data     The user data passed from the foreach function
+ * @return    @c true to continue with the next iteration of the loop, \n otherwise @c false to break out of the loop
+ * @pre	recorder_foreach_supported_video_resolution() will invoke this callback.
+ * @see	recorder_foreach_supported_video_resolution()
+ */
+typedef bool (*recorder_supported_video_resolution_cb)(int width, int height, void *user_data);
 
 /**
  * @brief	Called when the error occurred.
@@ -676,6 +690,42 @@ int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_suppo
  */
 
 /**
+ * @brief Sets the resolution of the video recording.
+ * @since_tizen 2.3
+ * @remarks This function should be called before recording (recorder_start()).
+ * @param[in] recorder	The handle to the media recorder
+ * @param[in] width	The preview width
+ * @param[in] height	The preview height
+ * @return @c 0 on success, otherwise a negative error value
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
+ * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
+ * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
+ * @pre    The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY.
+ * @see	recorder_start()
+ * @see	recorder_get_video_resolution()
+ * @see	recorder_foreach_supported_video_resolution()
+ */
+int recorder_set_video_resolution(recorder_h recorder, int width, int height);
+
+/**
+ * @brief Gets the resolution of the video recording.
+ * @since_tizen 2.3
+ * @param[in] recorder	The handle to the media recorder
+ * @param[out] width	The video width
+ * @param[out] height	The video height
+ * @return	  0 on success, otherwise a negative error value
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
+ * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
+ * @see	recorder_set_video_resolution()
+ * @see	recorder_foreach_supported_video_resolution()
+ */
+int recorder_get_video_resolution(recorder_h recorder, int *width, int *height);
+
+/**
  * @brief  Sets the video codec for encoding video stream.
  * @remarks You can get available video encoders by using recorder_foreach_supported_video_encoder().
  * @param[in] recorder The handle to media recorder
@@ -711,6 +761,25 @@ int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *code
  * @addtogroup CAPI_MEDIA_RECORDER_CAPABILITY_MODULE
  * @{
  */
+
+/**
+ * @brief Retrieves all supported video resolutions by invoking callback function once for each supported video resolution.
+ * @since_tizen 2.3
+ * @param[in] recorder	The handle to the media recorder
+ * @param[in] foreach_cb	The callback function to be invoked
+ * @param[in] user_data	The user data to be passed to the callback function
+ * @return @c 0 on success, otherwise a negative error value
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
+ * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
+ * @post	This function invokes recorder_supported_video_resolution_cb() repeatedly to retrieve each supported video resolution.
+ * @see	recorder_set_video_resolution()
+ * @see	recorder_get_video_resolution()
+ * @see	recorder_supported_video_resolution_cb()
+ */
+int recorder_foreach_supported_video_resolution(recorder_h recorder,
+                                                recorder_supported_video_resolution_cb foreach_cb, void *user_data);
 
 /**
  * @brief  Retrieves all supported video encoders by invoking a specific callback for each supported video encoder.
