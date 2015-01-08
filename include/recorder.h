@@ -61,6 +61,8 @@ typedef enum
 	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM */
 	RECORDER_ERROR_ESD = RECORDER_ERROR_CLASS | 0x0a,                       /**< ESD situation */
 	RECORDER_ERROR_OUT_OF_STORAGE = RECORDER_ERROR_CLASS | 0x0b,            /**< Out of storage */
+	RECORDER_ERROR_PERMISSION_DENIED = TIZEN_ERROR_PERMISSION_DENIED,       /**< The access to the resources can not be granted */
+	RECORDER_ERROR_NOT_SUPPORTED         = TIZEN_ERROR_NOT_SUPPORTED,       /**< The feature is not supported */
 } recorder_error_e;
 
 /**
@@ -248,6 +250,18 @@ typedef void (*recorder_interrupted_cb)(recorder_policy_e policy, recorder_state
  * @see recorder_set_audio_stream_cb()
  */
 typedef void (*recorder_audio_stream_cb)(void* stream, int size, audio_sample_type_e format, int channel, unsigned int timestamp, void *user_data);
+
+/**
+ * @brief Called once for each supported video resolution.
+ * @since_tizen 2.3
+ * @param[in] width         The video image width
+ * @param[in] height        The video image height
+ * @param[in] user_data     The user data passed from the foreach function
+ * @return    @c true to continue with the next iteration of the loop, \n otherwise @c false to break out of the loop
+ * @pre	recorder_foreach_supported_video_resolution() will invoke this callback.
+ * @see	recorder_foreach_supported_video_resolution()
+ */
+typedef bool (*recorder_supported_video_resolution_cb)(int width, int height, void *user_data);
 
 /**
  * @brief	Called when the error occurred.
