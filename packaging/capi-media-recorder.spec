@@ -1,6 +1,6 @@
 Name:       capi-media-recorder
-Summary:    A Recorder library in Tizen C API
-Version:    0.2.0
+Summary:    A Recorder library in Tizen Native API
+Version:    0.2.1
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -15,7 +15,7 @@ BuildRequires:  pkgconfig(capi-media-audio-io)
 
 
 %description
-A Recorder library in Tizen C API
+A Recorder library in Tizen Native API
 
 
 %package devel
@@ -24,9 +24,7 @@ Requires: %{name} = %{version}-%{release}
 
 
 %description devel
-A Recorder library in Tizen C API
-
-Development Package.
+A Recorder library in Tizen Native API Development Package.
 
 
 %prep
@@ -40,6 +38,11 @@ make %{?jobs:-j%jobs}
 
 
 %install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/license
+cp LICENSE.APLv2 %{buildroot}/usr/share/license/%{name}
+
+
 %make_install
 
 
@@ -51,11 +54,10 @@ make %{?jobs:-j%jobs}
 
 %files
 %manifest capi-media-recorder.manifest
-%license LICENSE.APLv2
 %{_libdir}/libcapi-media-recorder.so.*
+%{_datadir}/license/%{name}
 
 %files devel
 %{_includedir}/media/recorder.h
 %{_libdir}/pkgconfig/*.pc
 %{_libdir}/libcapi-media-recorder.so
-
