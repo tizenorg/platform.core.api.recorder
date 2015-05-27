@@ -11,7 +11,7 @@
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
-* limitations under the License. 
+* limitations under the License.
 */
 
 #ifndef __TIZEN_MULTIMEDIA_RECORDER_H__
@@ -29,7 +29,7 @@ extern "C" {
 /**
  * @file recorder.h
  * @brief This file contains the Recorder API.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 
 /**
@@ -39,35 +39,36 @@ extern "C" {
 
 /**
  * @brief The Media recorder handle.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef struct recorder_s *recorder_h;
 
 /**
  * @brief Enumeration for error code of the media recorder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
-	RECORDER_ERROR_NONE = TIZEN_ERROR_NONE,                                 /**< Successful */
-	RECORDER_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER,       /**< Invalid parameter */
-	RECORDER_ERROR_INVALID_STATE = RECORDER_ERROR_CLASS | 0x02,             /**< Invalid state */
-	RECORDER_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY ,              /**< Out of memory */
-	RECORDER_ERROR_DEVICE = RECORDER_ERROR_CLASS | 0x04,                    /**< Device error */
-	RECORDER_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,       /**< Internal error */
-	RECORDER_ERROR_SOUND_POLICY = RECORDER_ERROR_CLASS | 0x06,              /**< Blocked by Audio Session Manager */
-	RECORDER_ERROR_SECURITY_RESTRICTED = RECORDER_ERROR_CLASS | 0x07,       /**< Restricted by security system policy */
-	RECORDER_ERROR_SOUND_POLICY_BY_CALL = RECORDER_ERROR_CLASS | 0x08,      /**< Blocked by Audio Session Manager - CALL */
-	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM */
-	RECORDER_ERROR_ESD = RECORDER_ERROR_CLASS | 0x0a,                       /**< ESD situation */
-	RECORDER_ERROR_OUT_OF_STORAGE = RECORDER_ERROR_CLASS | 0x0b,            /**< Out of storage */
-	RECORDER_ERROR_PERMISSION_DENIED = TIZEN_ERROR_PERMISSION_DENIED,       /**< The access to the resources can not be granted */
+	RECORDER_ERROR_NONE                  = TIZEN_ERROR_NONE,                /**< Successful */
+	RECORDER_ERROR_INVALID_PARAMETER     = TIZEN_ERROR_INVALID_PARAMETER,   /**< Invalid parameter */
+	RECORDER_ERROR_INVALID_STATE         = RECORDER_ERROR_CLASS | 0x02,     /**< Invalid state */
+	RECORDER_ERROR_OUT_OF_MEMORY         = TIZEN_ERROR_OUT_OF_MEMORY ,      /**< Out of memory */
+	RECORDER_ERROR_DEVICE                = RECORDER_ERROR_CLASS | 0x04,     /**< Device error */
+	RECORDER_ERROR_INVALID_OPERATION     = TIZEN_ERROR_INVALID_OPERATION,   /**< Internal error */
+	RECORDER_ERROR_SOUND_POLICY          = RECORDER_ERROR_CLASS | 0x06,     /**< Blocked by Audio Session Manager (Deprecated since 2.4) */
+	RECORDER_ERROR_SECURITY_RESTRICTED   = RECORDER_ERROR_CLASS | 0x07,     /**< Restricted by security system policy */
+	RECORDER_ERROR_SOUND_POLICY_BY_CALL  = RECORDER_ERROR_CLASS | 0x08,     /**< Blocked by Audio Session Manager - CALL (Deprecated since 2.4) */
+	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM (Deprecated since 2.4) */
+	RECORDER_ERROR_ESD                   = RECORDER_ERROR_CLASS | 0x0a,     /**< ESD situation */
+	RECORDER_ERROR_OUT_OF_STORAGE        = RECORDER_ERROR_CLASS | 0x0b,     /**< Out of storage */
+	RECORDER_ERROR_PERMISSION_DENIED     = TIZEN_ERROR_PERMISSION_DENIED,   /**< The access to the resources can not be granted */
 	RECORDER_ERROR_NOT_SUPPORTED         = TIZEN_ERROR_NOT_SUPPORTED,       /**< The feature is not supported */
+	RECORDER_ERROR_RESOURCE_CONFLICT     = RECORDER_ERROR_CLASS | 0x0c,     /**< Blocked by resource conflict (Since 2.4) */
 } recorder_error_e;
 
 /**
  * @brief Enumeration for recorder states.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -80,7 +81,7 @@ typedef enum
 
 /**
  * @brief Enumeration for the recording limit.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -91,7 +92,7 @@ typedef enum
 
 /**
  * @brief Enumeration for the file container format.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -105,7 +106,7 @@ typedef enum
 
 /**
  * @brief Enumeration for the audio codec.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -118,7 +119,7 @@ typedef enum
 
 /**
  * @brief Enumeration for the video codec.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -130,7 +131,7 @@ typedef enum
 
 /**
  * @brief Enumeration for audio capture devices.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -140,7 +141,7 @@ typedef enum
 
 /**
  * @brief Enumeration for the recorder rotation type.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -151,28 +152,17 @@ typedef enum
 } recorder_rotation_e;
 
 /**
- * @brief Enumerations for the recorder flip type.
- */
-typedef enum
-{
-	RECORDER_FLIP_NONE, /**< No Flip */
-	RECORDER_FLIP_HORIZONTAL, /**< Horizontal flip */
-	RECORDER_FLIP_VERTICAL, /**< Vertical flip */
-	RECORDER_FLIP_BOTH /**< Horizontal and vertical flip */
-} recorder_flip_e;
-
-
-/**
  * @brief Enumeration for the recorder policy.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
 	RECORDER_POLICY_NONE = 0,       /**< None */
-	RECORDER_POLICY_SOUND,          /**< Sound policy */
-	RECORDER_POLICY_SOUND_BY_CALL,  /**< Sound policy by CALL */
-	RECORDER_POLICY_SOUND_BY_ALARM, /**< Sound policy by ALARM */
-	RECORDER_POLICY_SECURITY        /**< Security policy */
+	RECORDER_POLICY_SOUND,          /**< Sound policy (Deprecated since 2.4) */
+	RECORDER_POLICY_SOUND_BY_CALL,  /**< Sound policy by CALL (Deprecated since 2.4) */
+	RECORDER_POLICY_SOUND_BY_ALARM, /**< Sound policy by ALARM (Deprecated since 2.4) */
+	RECORDER_POLICY_SECURITY,       /**< Security policy */
+	RECORDER_POLICY_RESOURCE_CONFLICT /**< Resource conflict (Since 2.4) */
 } recorder_policy_e;
 
 /**
@@ -187,7 +177,7 @@ typedef enum
 /**
  * @brief Called when limitation error occurs while recording.
  * @details The callback function is possible to receive three types of limits: time, size and no-space.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks After being called, recording data is discarded and not written in the recording file. Also the state of recorder is not changed.
  * @param[in] type The imitation type
  * @param[in] user_data The user data passed from the callback registration function
@@ -200,7 +190,7 @@ typedef void (*recorder_recording_limit_reached_cb)(recorder_recording_limit_typ
 
 /**
  * @brief Called to indicate the recording status.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This callback function is repeatedly invoked during the #RECORDER_STATE_RECORDING state.
  * @param[in] elapsed_time  The time of the recording (milliseconds)
  * @param[in] file_size     The size of the recording file (KB)
@@ -214,7 +204,7 @@ typedef void (*recorder_recording_status_cb)(unsigned long long elapsed_time, un
 
 /**
  * @brief Called when the record state is changed.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] previous	The previous state of the recorder
  * @param[in] current	The current state of the recorder
  * @param[in] by_policy     @c true if the state is changed by policy, otherwise @c false if the state is not changed
@@ -232,7 +222,7 @@ typedef void (*recorder_state_changed_cb)(recorder_state_e previous , recorder_s
 
 /**
  * @brief Called when the recorder is interrupted by a policy.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] policy        The policy that is interrupting the recorder
  * @param[in] previous      The previous state of the recorder
  * @param[in] current       The current state of the recorder
@@ -243,7 +233,7 @@ typedef void (*recorder_interrupted_cb)(recorder_policy_e policy, recorder_state
 
 /**
  * @brief Called when audio stream data was being delivered just before storing in the recorded file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks The callback function holds the same buffer that will be recorded. \n
  *          So if the user changes the buffer, the result file will contain the buffer.
  * @remarks The callback is called via internal thread of Frameworks, therefore do not invoke UI API, recorder_unprepare(), recorder_commit() and recorder_cancel() in callback.
@@ -259,7 +249,7 @@ typedef void (*recorder_audio_stream_cb)(void* stream, int size, audio_sample_ty
 
 /**
  * @brief Called once for each supported video resolution.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] width         The video image width
  * @param[in] height        The video image height
  * @param[in] user_data     The user data passed from the foreach function
@@ -271,7 +261,7 @@ typedef bool (*recorder_supported_video_resolution_cb)(int width, int height, vo
 
 /**
  * @brief Called when the error occurred.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This callback informs about the critical error situation. \n
  *          When being invoked, user should release the resource and terminate the application. \n
  *          This error code will be reported.
@@ -298,7 +288,7 @@ typedef void (*recorder_error_cb)(recorder_error_e error, recorder_state_e curre
 
 /**
  * @brief Called iteratively to notify about the supported file formats.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] format   The format of recording files
  * @param[in] user_data	The user data passed from the foreach function
  * @return @c true to continue with the next iteration of the loop, \n otherwise @c false to break out of the loop
@@ -309,7 +299,7 @@ typedef bool (*recorder_supported_file_format_cb)(recorder_file_format_e format,
 
 /**
  * @brief Called iteratively to notify about the supported audio encoders.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] codec	The codec of audio encoder
  * @param[in] user_data	The user data passed from the foreach function
  * @return @c true to continue with the next iteration of the loop, \n otherwise @c false to break out of the loop
@@ -320,7 +310,7 @@ typedef bool (*recorder_supported_audio_encoder_cb)(recorder_audio_codec_e codec
 
 /**
  * @brief Called iteratively to notify about the supported video encoders.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] codec	The codec of video encoder
  * @param[in] user_data	The user data passed from the foreach function
  * @return @c true to continue with the next iteration of the loop, \n otherwise @c false to break out of the loop
@@ -340,7 +330,7 @@ typedef bool (*recorder_supported_video_encoder_cb)(recorder_video_codec_e codec
 
 /**
  * @brief Creates a recorder handle to record a video.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks You must release @a recorder using recorder_destroy(). \n
@@ -368,7 +358,7 @@ int recorder_create_videorecorder(camera_h camera, recorder_h *recorder);
 
 /**
  * @brief Creates a recorder handle to record an audio.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks You must release @a recorder using recorder_destroy().
@@ -389,7 +379,7 @@ int recorder_create_audiorecorder(recorder_h *recorder);
 
 /**
  * @brief Destroys the recorder handle.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks The video recorder's camera handle is not released by this function.
@@ -411,7 +401,7 @@ int recorder_destroy(recorder_h recorder);
 
 /**
  * @brief Prepares the media recorder for recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks Before calling the function, it is required to properly set audio encoder (recorder_set_audio_encoder()),
@@ -439,7 +429,7 @@ int recorder_prepare(recorder_h recorder);
 
 /**
  * @brief Resets the media recorder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @param[in]  recorder  The handle to the media recorder
@@ -461,7 +451,7 @@ int recorder_unprepare(recorder_h recorder);
 
 /**
  * @brief Starts the recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks If file path has been set to an existing file, this file is removed automatically and updated by new one. \n
@@ -495,7 +485,7 @@ int recorder_start(recorder_h recorder);
 
 /**
  * @brief Pauses the recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks Recording can be resumed with recorder_start().
@@ -517,7 +507,7 @@ int recorder_pause(recorder_h recorder);
 
 /**
  * @brief Stops recording and saves the result.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks When you want to record audio or video file, you need to add privilege according to rules below additionally. \n
@@ -543,7 +533,7 @@ int recorder_commit(recorder_h recorder);
 /**
  * @brief Cancels the recording.
  * @details The recording data is discarded and not written in the recording file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/recorder
  * @remarks When you want to record audio or video file, you need to add privilege according to rules below additionally. \n
@@ -568,7 +558,7 @@ int recorder_cancel(recorder_h recorder);
 
 /**
  * @brief Gets the recorder's current state.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder The handle to the media recorder
  * @param[out]	state  The current state of the recorder
  * @return  @c 0 on success, otherwise a negative error value
@@ -581,7 +571,7 @@ int recorder_get_state(recorder_h recorder, recorder_state_e *state);
 
 /**
  * @brief Gets the peak audio input level that was sampled since the last call to this function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks @c 0 dB indicates maximum input level, @c -300 dB indicates minimum input level.
  * @param[in]  recorder The handle to the media recorder
  * @param[out] dB  The audio input level in dB
@@ -598,7 +588,7 @@ int recorder_get_audio_level(recorder_h recorder, double *dB);
 /**
  * @brief Sets the file path to record.
  * @details This function sets file path which defines where newly recorded data should be stored.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks If the same file already exists in the file system, then old file will be overwritten.
  * @param[in]	recorder	The handle to the media recorder
  * @param[in]	path The recording file path
@@ -608,14 +598,14 @@ int recorder_get_audio_level(recorder_h recorder, double *dB);
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @pre The recorder state must be #RECORDER_STATE_CREATED by recorder_create() or recorder_unprepare().
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY.
  * @see	recorder_get_filename()
  */
 int recorder_set_filename(recorder_h recorder, const char *path);
 
 /**
  * @brief Gets the file path to record.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks You must release @a path using free().
  * @param[in]	recorder    The handle to the media recorder
  * @param[out]	path    The recording file path
@@ -630,7 +620,10 @@ int recorder_get_filename(recorder_h recorder, char **path);
 
 /**
  * @brief Sets the file format for recording media stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @remarks Since 2.3.1, it could be returned #RECORDER_ERROR_INVALID_OPERATION \n
+ *          when it's audio recorder and its state is #RECORDER_STATE_READY \n
+ *          because of checking codec compatibility with current encoder.
  * @param[in] recorder The handle to the media recorder
  * @param[in] format   The media file format
  * @return @c 0 on success, otherwise a negative error value
@@ -639,7 +632,9 @@ int recorder_get_filename(recorder_h recorder, char **path);
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @pre The recorder state must be #RECORDER_STATE_CREATED.
+ * @retval #RECORDER_ERROR_INVALID_OPERATION Invalid operation (Since 2.3.1)
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY (for video recorder only).\n
+ *      Since 2.3.1, this API also works for audio recorder when its state is #RECORDER_STATE_READY.
  * @see recorder_get_file_format()
  * @see recorder_foreach_supported_file_format()
  */
@@ -648,7 +643,7 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
 
 /**
  * @brief Gets the file format for recording media stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder The handle to the media recorder
  * @param[out] format   The media file format
  * @return @c 0 on success, otherwise a negative error value
@@ -673,7 +668,7 @@ int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format
 
 /**
  * @brief Retrieves all supported file formats by invoking a specific callback for each supported file format.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[in] callback The iteration callback
  * @param[in] user_data	The user data to be passed to the callback function
@@ -700,9 +695,12 @@ int recorder_foreach_supported_file_format(recorder_h recorder, recorder_support
 
 /**
  * @brief Sets the audio codec for encoding an audio stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks You can get available audio encoders by using recorder_foreach_supported_audio_encoder(). \n
- *          If set to #RECORDER_AUDIO_CODEC_DISABLE, the audio track is not created in recording files.
+ *          If set to #RECORDER_AUDIO_CODEC_DISABLE, the audio track is not created in recording files.\n
+ *          Since 2.3.1, it could be returned #RECORDER_ERROR_INVALID_OPERATION \n
+ *          when it's audio recorder and its state is #RECORDER_STATE_READY \n
+ *          because of checking codec compatibility with current file format.
  * @param[in] recorder The handle to the media recorder
  * @param[in] codec    The audio codec
  * @return @c 0 on success, otherwise a negative error value
@@ -711,6 +709,7 @@ int recorder_foreach_supported_file_format(recorder_h recorder, recorder_support
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
+ * @retval #RECORDER_ERROR_INVALID_OPERATION Invalid operation (Since 2.3.1)
  * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY.
  * @see	recorder_get_audio_encoder()
  * @see recorder_foreach_supported_audio_encoder()
@@ -719,7 +718,7 @@ int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e codec
 
 /**
  * @brief Gets the audio codec for encoding an audio stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder The handle to the media recorder
  * @param[out] codec   The audio codec
  * @return @c 0 on success, otherwise a negative error value
@@ -743,7 +742,7 @@ int recorder_get_audio_encoder(recorder_h recorder, recorder_audio_codec_e *code
 
 /**
  * @brief Retrieves all supported audio encoders by invoking a specific callback for each supported audio encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[in] callback	The iteration callback
  * @param[in] user_data	The user data to be passed to the callback function
@@ -770,7 +769,7 @@ int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_suppo
 
 /**
  * @brief Sets the resolution of the video recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This function should be called before recording (recorder_start()).
  * @param[in] recorder	The handle to the media recorder
  * @param[in] width	The preview width
@@ -790,11 +789,11 @@ int recorder_set_video_resolution(recorder_h recorder, int width, int height);
 
 /**
  * @brief Gets the resolution of the video recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder	The handle to the media recorder
  * @param[out] width	The video width
  * @param[out] height	The video height
- * @return	  0 on success, otherwise a negative error value
+ * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
@@ -805,8 +804,45 @@ int recorder_set_video_resolution(recorder_h recorder, int width, int height);
 int recorder_get_video_resolution(recorder_h recorder, int *width, int *height);
 
 /**
+ * @}
+*/
+
+/**
+ * @addtogroup CAPI_MEDIA_RECORDER_CAPABILITY_MODULE
+ * @{
+ */
+
+/**
+ * @brief Retrieves all supported video resolutions by invoking callback function once for each supported video resolution.
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @param[in] recorder	The handle to the media recorder
+ * @param[in] foreach_cb	The callback function to be invoked
+ * @param[in] user_data	The user data to be passed to the callback function
+ * @return @c 0 on success, otherwise a negative error value
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
+ * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
+ * @post	This function invokes recorder_supported_video_resolution_cb() repeatedly to retrieve each supported video resolution.
+ * @see	recorder_set_video_resolution()
+ * @see	recorder_get_video_resolution()
+ * @see	recorder_supported_video_resolution_cb()
+ */
+int recorder_foreach_supported_video_resolution(recorder_h recorder,
+                                                recorder_supported_video_resolution_cb foreach_cb, void *user_data);
+
+/**
+ * @}
+*/
+
+/**
+ * @addtogroup CAPI_MEDIA_RECORDER_MODULE
+ * @{
+ */
+
+/**
  * @brief Sets the video codec for encoding video stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks You can get available video encoders by using recorder_foreach_supported_video_encoder().
  * @param[in] recorder The handle to the media recorder
  * @param[in] codec    The video codec
@@ -824,7 +860,7 @@ int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e codec
 
 /**
  * @brief Gets the video codec for encoding video stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder The handle to the media recorder
  * @param[out] codec   The video codec
  * @return @c 0 on success, otherwise a negative error value
@@ -847,27 +883,8 @@ int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *code
  */
 
 /**
- * @brief Retrieves all supported video resolutions by invoking callback function once for each supported video resolution.
- * @since_tizen 2.3
- * @param[in] recorder	The handle to the media recorder
- * @param[in] foreach_cb	The callback function to be invoked
- * @param[in] user_data	The user data to be passed to the callback function
- * @return @c 0 on success, otherwise a negative error value
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
- * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
- * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @post	This function invokes recorder_supported_video_resolution_cb() repeatedly to retrieve each supported video resolution.
- * @see	recorder_set_video_resolution()
- * @see	recorder_get_video_resolution()
- * @see	recorder_supported_video_resolution_cb()
- */
-int recorder_foreach_supported_video_resolution(recorder_h recorder,
-                                                recorder_supported_video_resolution_cb foreach_cb, void *user_data);
-
-/**
  * @brief Retrieves all supported video encoders by invoking a specific callback for each supported video encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder	The handle to the media recorder
  * @param[in] callback	The iteration callback
  * @param[in] user_data	The user data to be passed to the callback function
@@ -894,7 +911,7 @@ int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_suppo
 
 /**
  * @brief Registers the callback function that will be invoked when the recorder state changes.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder	The handle to the media recorder
  * @param[in] callback	The function pointer of user callback
  * @param[in] user_data The user data to be passed to the callback function
@@ -911,7 +928,7 @@ int recorder_set_state_changed_cb(recorder_h recorder, recorder_state_changed_cb
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder The handle to the media recorder
  * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
@@ -924,7 +941,7 @@ int recorder_unset_state_changed_cb(recorder_h recorder);
 
 /**
  * @brief Registers a callback function to be called when the media recorder is interrupted according to a policy.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder	The handle to the media recorder
  * @param[in] callback	  The callback function to register
  * @param[in] user_data   The user data to be passed to the callback function
@@ -941,7 +958,7 @@ int recorder_set_interrupted_cb(recorder_h recorder, recorder_interrupted_cb cal
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to the media recorder
  * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
@@ -954,7 +971,7 @@ int recorder_unset_interrupted_cb(recorder_h recorder);
 
 /**
  * @brief Registers a callback function to be called when audio stream data is being delivered.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This callback function holds the same buffer that will be recorded. \n
  *          Therefore if an user changes the buffer, the result file will have the buffer. \n
  * @remarks The callback is called via internal thread of Frameworks. Therefore do not invoke UI API, recorder_unprepare(), recorder_commit() and recorder_cancel() in callback.\n
@@ -976,20 +993,20 @@ int recorder_set_audio_stream_cb(recorder_h recorder, recorder_audio_stream_cb c
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to the media recorder
  * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @see	recorder_set_audio_stream_cb()
+ * @see     recorder_set_audio_stream_cb()
  */
 int recorder_unset_audio_stream_cb(recorder_h recorder);
 
 /**
  * @brief Registers a callback function to be invoked when the recording information changes.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder   The handle to the media recorder
  * @param[in]  callback   The function pointer of user callback
  * @param[in]  user_data  The user data to be passed to the callback function
@@ -1006,7 +1023,7 @@ int recorder_set_recording_status_cb(recorder_h recorder, recorder_recording_sta
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder    The handle to the media recorder
  * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
@@ -1019,7 +1036,7 @@ int recorder_unset_recording_status_cb(recorder_h recorder);
 
 /**
  * @brief Registers the callback function to be run when reached the recording limit.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to media recorder
  * @param[in]	callback	The function pointer of user callback
  * @param[in]	user_data	The user data to be passed to the callback function
@@ -1038,7 +1055,7 @@ int recorder_set_recording_limit_reached_cb(recorder_h recorder, recorder_record
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder  The handle to the media recorder
  * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
@@ -1051,7 +1068,7 @@ int recorder_unset_recording_limit_reached_cb(recorder_h recorder);
 
 /**
  * @brief Registers a callback function to be called when an asynchronous operation error occurred.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This callback informs critical error situation.\n
  *          When this callback is invoked, user should release the resource and terminate the application. \n
  *          These error codes will occur. \n
@@ -1075,7 +1092,7 @@ int recorder_set_error_cb(recorder_h recorder, recorder_error_cb callback, void 
 
 /**
  * @brief Unregisters the callback function.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to the recorder
  * @return  @c on success, otherwise a negative error value
  * @retval    #RECORDER_ERROR_NONE Successful
@@ -1099,7 +1116,7 @@ int recorder_unset_error_cb(recorder_h recorder);
 
 /**
  * @brief Sets the maximum size of a recording file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks After reaching the limitation, the recording data is discarded and not written in the recording file.
  * @param[in] recorder The handle to the media recorder
  * @param[in] kbyte    The maximum size of the recording file(KB) \n
@@ -1118,7 +1135,7 @@ int recorder_attr_set_size_limit(recorder_h recorder, int kbyte);
 
 /**
  * @brief Gets the maximum size of a recording file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder The handle to the media recorder
  * @param[out] kbyte    The maximum size of recording file (KB) \n
  *                      @c 0 means unlimited recording size.
@@ -1134,7 +1151,7 @@ int recorder_attr_get_size_limit(recorder_h recorder, int *kbyte);
 
 /**
  * @brief Sets the time limit of a recording file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks After reaching the limitation, the recording data is discarded and not written in the recording file.
  * @param[in] recorder The handle to the media recorder
  * @param[in] second   The time limit of the recording file (in seconds) \n
@@ -1154,7 +1171,7 @@ int recorder_attr_set_time_limit(recorder_h recorder, int second);
 
 /**
  * @brief Gets the time limit of a recording file.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder  The handle to the media recorder
  * @param[out] second    The time limit of the recording file (in seconds) \n
  *                       @c 0 means unlimited recording time.
@@ -1170,7 +1187,7 @@ int recorder_attr_get_time_limit(recorder_h recorder, int *second);
 
 /**
  * @brief Sets the audio device for recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder The handle to the media recorder
  * @param[in] device   The type of an audio device
  * @return @c 0 on success, otherwise a negative error value
@@ -1179,14 +1196,15 @@ int recorder_attr_get_time_limit(recorder_h recorder, int *second);
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @pre The recorder state must be #RECORDER_STATE_CREATED.
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY (for video recorder only).\n
+ *      Since 2.3.1, this API also works for audio recorder when its state is #RECORDER_STATE_READY.
  * @see	recorder_attr_get_audio_device()
  */
 int recorder_attr_set_audio_device(recorder_h recorder, recorder_audio_device_e device);
 
 /**
  * @brief Gets the audio device for recording.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[out] device The type of an audio device
  * @return @c 0 on success, otherwise a negative error value
@@ -1200,7 +1218,7 @@ int recorder_attr_get_audio_device(recorder_h recorder, recorder_audio_device_e 
 
 /**
  * @brief Sets the sampling rate of an audio stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder    The handle to the media recorder
  * @param[in] samplerate The sample rate in Hertz
  * @return @c 0 on success, otherwise a negative error value
@@ -1209,14 +1227,15 @@ int recorder_attr_get_audio_device(recorder_h recorder, recorder_audio_device_e 
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @pre The recorder state must be #RECORDER_STATE_CREATED.
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY (for video recorder only).\n
+ *      Since 2.3.1, this API also works for audio recorder when its state is #RECORDER_STATE_READY.
  * @see	recorder_attr_get_audio_samplerate()
  */
 int recorder_attr_set_audio_samplerate(recorder_h recorder, int samplerate);
 
 /**
  * @brief Gets the sampling rate of an audio stream.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder    The handle to the media recorder
  * @param[out] samplerate  The sample rate in Hertz
  * @return @c 0 on success, otherwise a negative error value
@@ -1230,7 +1249,7 @@ int recorder_attr_get_audio_samplerate(recorder_h recorder, int *samplerate);
 
 /**
  * @brief Sets the bitrate of an audio encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[in] bitrate   The bitrate (for mms : 12200[bps], normal : 288000[bps])
  * @return @c 0 on success, otherwise a negative error value
@@ -1246,7 +1265,7 @@ int recorder_attr_set_audio_encoder_bitrate(recorder_h recorder, int bitrate);
 
 /**
  * @brief Sets the bitrate of a video encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[in] bitrate   The bitrate in bits per second
  * @return @c 0 on success, otherwise a negative error value
@@ -1262,7 +1281,7 @@ int recorder_attr_set_video_encoder_bitrate(recorder_h recorder, int bitrate);
 
 /**
  * @brief Gets the bitrate of an audio encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder  The handle to the media recorder
  * @param[out] bitrate   The bitrate in bits per second
  * @return @c 0 on success, otherwise a negative error value
@@ -1276,7 +1295,7 @@ int recorder_attr_get_audio_encoder_bitrate(recorder_h recorder, int *bitrate);
 
 /**
  * @brief Gets the bitrate of a video encoder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]  recorder  The handle to the media recorder
  * @param[out] bitrate   The bitrate in bits per second
  * @return @c 0 on success, otherwise a negative error value
@@ -1290,7 +1309,7 @@ int recorder_attr_get_video_encoder_bitrate(recorder_h recorder, int *bitrate);
 
 /**
  * @brief Sets the mute state of a recorder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[in] enable The mute state
  * @return @c 0 on success, otherwise a negative error value
@@ -1304,7 +1323,7 @@ int recorder_attr_set_mute(recorder_h recorder, bool enable);
 
 /**
  * @brief Gets the mute state of a recorder.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder The handle to the media recorder
  * @remarks The specific error code can be obtained using the get_last_result() method. Error codes are described in Exception section.
  * @return  @c true if the recorder is not recording any sound,
@@ -1319,7 +1338,7 @@ bool recorder_attr_is_muted(recorder_h recorder);
 
 /**
  * @brief Sets the recording motion rate.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This attribute is valid only in a video recorder. \n
  *          If the rate bigger than @c 0 and smaller than @c 1, video is recorded in a slow motion mode. \n
  *          If the rate bigger than @c 1, video is recorded in a fast motion mode (time lapse recording).
@@ -1340,7 +1359,7 @@ int recorder_attr_set_recording_motion_rate(recorder_h recorder , double rate);
 
 /**
  * @brief Gets the recording motion rate.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This attribute is valid only in a video recorder. \n
  *          If the rate bigger than @c 0 and smaller than @c 1, video is recorded in a slow motion mode. \n
  *          If the rate bigger than @c 1, video is recorded in a fast motion mode (time lapse recording).
@@ -1358,12 +1377,9 @@ int recorder_attr_set_recording_motion_rate(recorder_h recorder , double rate);
  */
 int recorder_attr_get_recording_motion_rate(recorder_h recorder , double *rate);
 
-__attribute__ ((deprecated)) int recorder_attr_set_slow_motion_rate(recorder_h recorder , double rate);
-__attribute__ ((deprecated)) int recorder_attr_get_slow_motion_rate(recorder_h recorder , double *rate);
-
 /**
  * @brief Sets the number of the audio channel.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks This attribute is applied only in RECORDER_STATE_CREATED state. \n
  *          For mono recording, setting channel to @c 1. \n
  *          For stereo recording, setting channel to @c 2.
@@ -1374,14 +1390,15 @@ __attribute__ ((deprecated)) int recorder_attr_get_slow_motion_rate(recorder_h r
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
  * @retval #RECORDER_ERROR_NOT_SUPPORTED The feature is not supported
- * @pre The recorder state must be #RECORDER_STATE_CREATED.
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY (for video recorder only).\n
+ *      Since 2.3.1, this API also works for audio recorder when its state is #RECORDER_STATE_READY.
  * @see	recorder_attr_get_audio_channel()
  */
 int recorder_attr_set_audio_channel(recorder_h recorder, int channel_count);
 
 /**
  * @brief Gets the number of the audio channel.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] recorder  The handle to the media recorder
  * @param[out] channel_count  The number of the audio channel
  * @return @c 0 on success, otherwise a negative error value
@@ -1393,67 +1410,13 @@ int recorder_attr_set_audio_channel(recorder_h recorder, int channel_count);
  */
 int recorder_attr_get_audio_channel(recorder_h recorder, int *channel_count);
 
-/**
- * @brief Sets the orientation of video recording data
- * @remarks
- * This attribute is valid only in video recorder.\n
- * This attribute is applied in video encoding.
- * @param[in] recorder  The handle to media recorder
- * @param[in] orientation The orientation of video recording data
- * @return	0 on success, otherwise a negative error value.
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
- * @see	recorder_attr_get_recording_orientation()
- */
-__attribute__ ((deprecated)) int recorder_attr_set_recording_orientation(recorder_h recorder, recorder_rotation_e orientation);
-
-/**
- * @brief Gets the orientation of video recording data
- * @remarks
- * This attribute is valid only in video recorder.\n
- * @param[in] recorder  The handle to media recorder
- * @param[out] orientation The orientation of video recording data
- * @return	0 on success, otherwise a negative error value.
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
- * @see	recorder_attr_set_recording_orientation()
- */
-__attribute__ ((deprecated)) int recorder_attr_get_recording_orientation(recorder_h recorder, recorder_rotation_e *orientation);
-
-/**
- * @brief Sets the flip of video recording data
- * @remarks
- * This attribute is valid only in video recorder.\n
- * This attribute is applied in video encoding.
- * @param[in] recorder  The handle to media recorder
- * @param[in] flip The flip of video recording data
- * @return	0 on success, otherwise a negative error value.
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
- * @see	recorder_attr_get_recording_flip()
- */
-__attribute__ ((deprecated)) int recorder_attr_set_recording_flip(recorder_h recorder, recorder_flip_e flip);
-
-/**
- * @brief Gets the flip of video recording data
- * @remarks
- * This attribute is valid only in video recorder.\n
- * This attribute is applied in video encoding.
- * @param[in] recorder  The handle to media recorder
- * @param[out] flip The flip of video recording data
- * @return	0 on success, otherwise a negative error value.
- * @retval #RECORDER_ERROR_NONE Successful
- * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
- * @see	recorder_attr_set_recording_flip()
- */
-__attribute__ ((deprecated)) int recorder_attr_get_recording_flip(recorder_h recorder, recorder_flip_e *flip);
 
 /**
  * @brief Sets the video orientation in a video metadata tag.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to a media recorder
  * @param[in]	orientation	The information of the video orientation
- * @return      0 on success, otherwise a negative error value
+ * @return @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
@@ -1464,10 +1427,10 @@ int recorder_attr_set_orientation_tag(recorder_h recorder,  recorder_rotation_e 
 
 /**
  * @brief Gets the video orientation in a video metadata tag.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in]	recorder	The handle to a media recorder
  * @param[out]  orientation	The information of the video orientation
-* @return  @c 0 on success, otherwise a negative error value
+ * @return  @c 0 on success, otherwise a negative error value
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
