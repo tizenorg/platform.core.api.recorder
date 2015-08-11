@@ -55,14 +55,15 @@ typedef enum
 	RECORDER_ERROR_OUT_OF_MEMORY         = TIZEN_ERROR_OUT_OF_MEMORY ,      /**< Out of memory */
 	RECORDER_ERROR_DEVICE                = RECORDER_ERROR_CLASS | 0x04,     /**< Device error */
 	RECORDER_ERROR_INVALID_OPERATION     = TIZEN_ERROR_INVALID_OPERATION,   /**< Internal error */
-	RECORDER_ERROR_SOUND_POLICY          = RECORDER_ERROR_CLASS | 0x06,     /**< Blocked by Audio Session Manager */
+	RECORDER_ERROR_SOUND_POLICY          = RECORDER_ERROR_CLASS | 0x06,     /**< Blocked by Audio Session Manager (Deprecated since 3.0) */
 	RECORDER_ERROR_SECURITY_RESTRICTED   = RECORDER_ERROR_CLASS | 0x07,     /**< Restricted by security system policy */
-	RECORDER_ERROR_SOUND_POLICY_BY_CALL  = RECORDER_ERROR_CLASS | 0x08,     /**< Blocked by Audio Session Manager - CALL */
-	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM */
+	RECORDER_ERROR_SOUND_POLICY_BY_CALL  = RECORDER_ERROR_CLASS | 0x08,     /**< Blocked by Audio Session Manager - CALL (Deprecated since 3.0) */
+	RECORDER_ERROR_SOUND_POLICY_BY_ALARM = RECORDER_ERROR_CLASS | 0x09,     /**< Blocked by Audio Session Manager - ALARM (Deprecated since 3.0) */
 	RECORDER_ERROR_ESD                   = RECORDER_ERROR_CLASS | 0x0a,     /**< ESD situation */
 	RECORDER_ERROR_OUT_OF_STORAGE        = RECORDER_ERROR_CLASS | 0x0b,     /**< Out of storage */
 	RECORDER_ERROR_PERMISSION_DENIED     = TIZEN_ERROR_PERMISSION_DENIED,   /**< The access to the resources can not be granted */
 	RECORDER_ERROR_NOT_SUPPORTED         = TIZEN_ERROR_NOT_SUPPORTED,       /**< The feature is not supported */
+	RECORDER_ERROR_RESOURCE_CONFLICT     = RECORDER_ERROR_CLASS | 0x0c,     /**< Blocked by resource conflict (Since 3.0) */
 } recorder_error_e;
 
 /**
@@ -156,11 +157,12 @@ typedef enum
  */
 typedef enum
 {
-	RECORDER_POLICY_NONE = 0,       /**< None */
-	RECORDER_POLICY_SOUND,          /**< Sound policy */
-	RECORDER_POLICY_SOUND_BY_CALL,  /**< Sound policy by CALL */
-	RECORDER_POLICY_SOUND_BY_ALARM, /**< Sound policy by ALARM */
-	RECORDER_POLICY_SECURITY        /**< Security policy */
+	RECORDER_POLICY_NONE = 0,               /**< None */
+	RECORDER_POLICY_SOUND,                  /**< Sound policy (Deprecated since 3.0) */
+	RECORDER_POLICY_SOUND_BY_CALL,          /**< Sound policy by CALL (Deprecated since 3.0) */
+	RECORDER_POLICY_SOUND_BY_ALARM,         /**< Sound policy by ALARM (Deprecated since 3.0) */
+	RECORDER_POLICY_SECURITY,               /**< Security policy */
+	RECORDER_POLICY_RESOURCE_CONFLICT       /**< Resource conflict (Since 3.0) */
 } recorder_policy_e;
 
 /**
@@ -409,6 +411,7 @@ int recorder_destroy(recorder_h recorder);
  * @retval #RECORDER_ERROR_NONE Successful
  * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #RECORDER_ERROR_SOUND_POLICY Sound policy error
+ * @retval #RECORDER_ERROR_RESOURCE_CONFLICT Resource conflict error
  * @retval #RECORDER_ERROR_INVALID_OPERATION Invalid operation
  * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
  * @retval #RECORDER_ERROR_PERMISSION_DENIED The access to the resources can not be granted
