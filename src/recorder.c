@@ -298,20 +298,6 @@ static int __mm_recorder_msg_cb(int message, void *param, void *user_data)
 			((recorder_recording_status_cb)handle->user_cb[_RECORDER_EVENT_TYPE_RECORDING_STATUS])(m->recording_status.elapsed, m->recording_status.filesize, handle->user_data[_RECORDER_EVENT_TYPE_RECORDING_STATUS]);
 		}
 		break;
-	case MM_MESSAGE_CAMCORDER_VIDEO_CAPTURED:
-	case MM_MESSAGE_CAMCORDER_AUDIO_CAPTURED:
-		if (handle->type == _RECORDER_TYPE_AUDIO) {
-			MMCamRecordingReport *report = (MMCamRecordingReport *)m->data;
-			if (report != NULL && report->recording_filename) {
-				free(report->recording_filename);
-				report->recording_filename = NULL;
-			}
-			if (report) {
-				free(report);
-				report = NULL;
-			}
-		}
-		break;
 	case MM_MESSAGE_CAMCORDER_ERROR:
 		switch (m->code) {
 		case MM_ERROR_CAMCORDER_DEVICE:
