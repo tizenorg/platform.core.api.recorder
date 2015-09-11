@@ -23,8 +23,8 @@ SET(service "media")
 SET(submodule "recorder")
 
 # for package file
-SET(dependents "dlog mm-camcorder capi-media-camera capi-media-audio-io audio-session-mgr")
-SET(pc_dependents "capi-base-common capi-media-camera capi-media-audio-io")
+SET(dependents "dlog mm-common capi-base-common capi-media-tool capi-media-camera capi-media-audio-io audio-session-mgr")
+SET(pc_dependents "dlog libtbm capi-media-audio-io")
 
 SET(fw_name "${project_prefix}-${service}-${submodule}")
 
@@ -50,6 +50,13 @@ IF("${ARCH}" STREQUAL "arm")
     ADD_DEFINITIONS("-DTARGET")
 ENDIF("${ARCH}" STREQUAL "arm")
 
+IF(WAYLAND_SUPPORT)
+    ADD_DEFINITIONS("-DHAVE_WAYLAND")
+ENDIF(WAYLAND_SUPPORT)
+IF(X11_SUPPORT)
+    ADD_DEFINITIONS("-DHAVE_X11")
+ENDIF(X11_SUPPORT)
+
 ADD_DEFINITIONS("-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 ADD_DEFINITIONS("-DTIZEN_DEBUG")
 
@@ -58,14 +65,14 @@ SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed -Wl,--rpath=${LIB_INSTALL_DIR}")
 aux_source_directory(src SOURCES)
 ADD_LIBRARY(${fw_name} SHARED ${SOURCES})
 
-TARGET_LINK_LIBRARIES(${fw_name} ${${fw_name}_LDFLAGS})
-
 SET_TARGET_PROPERTIES(${fw_name}
      PROPERTIES
      VERSION ${FULLVER}
      SOVERSION ${MAJORVER}
      CLEAN_DIRECT_OUTPUT 1
 )
+
+TARGET_LINK_LIBRARIES(${fw_name} mused-recorder ${${fw_name}_LDFLAGS})
 
 INSTALL(TARGETS ${fw_name} DESTINATION ${LIB_INSTALL_DIR})
 INSTALL(
