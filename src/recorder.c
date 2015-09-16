@@ -622,6 +622,7 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 
 	ret = mm_camcorder_set_attributes(handle->mm_handle, NULL,
 					  MMCAM_MODE, MM_CAMCORDER_MODE_AUDIO,
+					  MMCAM_PID_FOR_SOUND_FOCUS, getpid(),
 					  NULL);
 
 	if (ret != MM_ERROR_NONE) {
