@@ -57,7 +57,7 @@ typedef struct _callback_cb_info {
 } callback_cb_info_s;
 
 typedef struct _recorder_cli_s{
-	int remote_handle;
+	intptr_t remote_handle;
 	callback_cb_info_s *cb_info;
 }recorder_cli_s;
 

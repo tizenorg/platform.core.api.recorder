@@ -108,13 +108,7 @@ static void _client_user_callback(callback_cb_info_s * cb_info, mmsvc_recorder_e
 				} else {
 					mmsvc_recorder_msg_get(cb_size, recvMsg);
 					if (cb_size > 0) {
-						stream = (void *)g_new(unsigned char, cb_size);
-						if (stream != NULL) {
-							memcpy(stream, (unsigned char *)transport_info.bo_handle.ptr, cb_size);
-						} else {
-							LOGE("memory allocation error.");
-						}
-						mmsvc_recorder_ipc_unref_tbm(transport_info);
+						stream = (unsigned char *)transport_info.bo_handle.ptr;
 					}
 				}
 			} else {
@@ -130,6 +124,8 @@ static void _client_user_callback(callback_cb_info_s * cb_info, mmsvc_recorder_e
 													cb_channel,
 													(unsigned int)cb_timestamp,
 													cb_info->user_data[event]);
+			//unref tbm after hand over the buffer.
+			mmsvc_recorder_ipc_unref_tbm(&transport_info);
 			break;
 		}
 		case MMSVC_RECORDER_EVENT_TYPE_ERROR:
@@ -365,7 +361,7 @@ int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
 	sock_fd = mmsvc_core_client_new();
 	sndMsg = mmsvc_core_msg_json_factory_new(api, "client", api_client,
 											      MUSED_TYPE_INT, PARAM_RECORDER_TYPE, recorder_type,
-											      MUSED_TYPE_INT, PARAM_CAMERA_HANDLE, camera_handle,
+											      MUSED_TYPE_POINTER, PARAM_CAMERA_HANDLE, camera_handle,
 											      0);
 	mmsvc_core_ipc_send_msg(sock_fd, sndMsg);
 	LOGD("sock_fd : %d, msg : %s", sock_fd, sndMsg);
@@ -376,7 +372,7 @@ int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
 
 	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
 	if (ret == RECORDER_ERROR_NONE) {
-		mmsvc_recorder_msg_get(handle, pc->cb_info->recvMsg);
+		mmsvc_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
 		if (handle == 0) {
 			LOGE("Receiving Handle Failed!!");
 			goto ErrorExit;
@@ -432,7 +428,7 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
 	if (ret == RECORDER_ERROR_NONE) {
 		intptr_t handle = 0;
-		mmsvc_recorder_msg_get(handle, pc->cb_info->recvMsg);
+		mmsvc_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
 		if (handle == 0) {
 			LOGE("Receiving Handle Failed!!");
 			goto ErrorExit;
