@@ -21,7 +21,7 @@
 #include <camera.h>
 #include <mm_camcorder.h>
 #include <recorder.h>
-#include <mmsvc_core.h>
+#include <muse_core.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,12 +45,12 @@ typedef struct _callback_cb_info {
 	GThread *thread;
 	gint running;
 	gint fd;
-	gpointer user_cb[MMSVC_RECORDER_EVENT_TYPE_NUM];
-	gpointer user_cb_completed[MMSVC_RECORDER_EVENT_TYPE_NUM];
-	gpointer user_data[MMSVC_RECORDER_EVENT_TYPE_NUM];
-	gchar recvMsg[MM_MSG_MAX_LENGTH];
-	gchar recvApiMsg[MM_MSG_MAX_LENGTH];
-	gchar recvEventMsg[MM_MSG_MAX_LENGTH];
+	gpointer user_cb[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gpointer user_cb_completed[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gpointer user_data[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gchar recvMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	gchar recvApiMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	gchar recvEventMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
 	GCond *pCond;
 	GMutex *pMutex;
 	gint *activating;

@@ -72,7 +72,7 @@ SET_TARGET_PROPERTIES(${fw_name}
      CLEAN_DIRECT_OUTPUT 1
 )
 
-TARGET_LINK_LIBRARIES(${fw_name} mused-recorder ${${fw_name}_LDFLAGS})
+TARGET_LINK_LIBRARIES(${fw_name} muse-recorder ${${fw_name}_LDFLAGS})
 
 INSTALL(TARGETS ${fw_name} DESTINATION ${LIB_INSTALL_DIR})
 INSTALL(
