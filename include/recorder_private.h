@@ -21,10 +21,13 @@
 #include <camera.h>
 #include <mm_camcorder.h>
 #include <recorder.h>
+#include <muse_core.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define RECORDER_PARSE_STRING_SIZE 200
 
 typedef union _mediaSource{
 	camera_h camera;
@@ -41,29 +44,31 @@ typedef enum {
 	_RECORDER_EVENT_TYPE_NUM
 }_recorder_event_e;
 
-typedef enum {
-	_RECORDER_TYPE_AUDIO = 0,
-	_RECORDER_TYPE_VIDEO
-}_recorder_type_e;
+typedef struct _callback_cb_info {
+	GThread *thread;
+	gint running;
+	gint fd;
+	gpointer user_cb[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gpointer user_cb_completed[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gpointer user_data[MUSE_RECORDER_EVENT_TYPE_NUM];
+	gchar recvMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	gchar recvApiMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	gchar recvEventMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	GCond *pCond;
+	GMutex *pMutex;
+	gint *activating;
+} callback_cb_info_s;
 
-typedef enum {
-	_RECORDER_SOURCE_TYPE_UNKNOWN,
-	_RECORDER_SOURCE_TYPE_CAMERA,
-}_recorder_source_type_e;
+typedef struct _recorder_cli_s{
+	intptr_t remote_handle;
+	callback_cb_info_s *cb_info;
+}recorder_cli_s;
 
-typedef struct _recorder_s{
-	MMHandleType mm_handle;
-	mediasource mm_source;
-	void* user_cb[_RECORDER_EVENT_TYPE_NUM];
-	void* user_data[_RECORDER_EVENT_TYPE_NUM];
-	unsigned int state;
-	int camera_device_count;
-	_recorder_type_e type;
-	_recorder_source_type_e src_type;
-	int origin_preview_format;
-	int changed_preview_format;
-	double last_max_input_level;
-} recorder_s;
+typedef struct _camera_cli_s{
+	intptr_t remote_handle;
+	MMHandleType client_handle;
+	callback_cb_info_s *cb_info;
+}camera_cli_s;
 
 int __convert_recorder_error_code(const char *func, int code);
 #ifdef __cplusplus
