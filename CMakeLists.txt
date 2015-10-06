@@ -1,29 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-SET(Services
-        "application"
-        "base"
-        "content"
-        "location"
-        "media"
-        "messaging"
-        "network"
-        "social"
-        "telephony"
-        "system"
-   )
-
 # project
 SET(project_prefix "capi")
 SET(prefix "/usr")
-SET(version "0.0.1")
 SET(maintainer "Seungkeun Lee <sngn.lee@samsung.com>, Kangho Hur<kagho.hur@samsung.com>")
 SET(description "A Camera library in Tizen Native API")
 SET(service "media")
 SET(submodule "recorder")
 
 # for package file
-SET(dependents "dlog mm-camcorder capi-media-camera capi-media-audio-io")
+SET(dependents "dlog mm-camcorder capi-media-camera capi-media-audio-io mmsvc-recorder")
 SET(pc_dependents "capi-base-common capi-media-camera capi-media-audio-io")
 
 SET(fw_name "${project_prefix}-${service}-${submodule}")
@@ -32,7 +18,6 @@ PROJECT(${fw_name})
 
 SET(CMAKE_INSTALL_PREFIX ${prefix})
 SET(PREFIX ${CMAKE_INSTALL_PREFIX})
-SET(VERSION ${version})
 
 SET(INC_DIR include)
 INCLUDE_DIRECTORIES(${INC_DIR})
