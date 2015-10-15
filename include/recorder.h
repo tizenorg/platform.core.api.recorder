@@ -47,8 +47,7 @@ typedef struct recorder_s *recorder_h;
  * @brief Enumeration for error code of the media recorder.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_ERROR_NONE                  = TIZEN_ERROR_NONE,                /**< Successful */
 	RECORDER_ERROR_INVALID_PARAMETER     = TIZEN_ERROR_INVALID_PARAMETER,   /**< Invalid parameter */
 	RECORDER_ERROR_INVALID_STATE         = RECORDER_ERROR_CLASS | 0x02,     /**< Invalid state */
@@ -70,8 +69,7 @@ typedef enum
  * @brief Enumeration for recorder states.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_STATE_NONE,      /**< Recorder is not created */
 	RECORDER_STATE_CREATED,   /**< Recorder is created, but not prepared */
 	RECORDER_STATE_READY,     /**< Recorder is ready to record \n In case of video recorder, preview display will be shown */
@@ -83,8 +81,7 @@ typedef enum
  * @brief Enumeration for the recording limit.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_RECORDING_LIMIT_TIME,        /**< Time limit (second) of recording file */
 	RECORDER_RECORDING_LIMIT_SIZE,        /**< Size limit (kilo bytes [KB]) of recording file */
 	RECORDER_RECORDING_LIMIT_FREE_SPACE,  /**< No free space in storage */
@@ -94,8 +91,7 @@ typedef enum
  * @brief Enumeration for the file container format.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_FILE_FORMAT_3GP,    /**< 3GP file format */
 	RECORDER_FILE_FORMAT_MP4,    /**< MP4 file format */
 	RECORDER_FILE_FORMAT_AMR,    /**< AMR file format */
@@ -108,8 +104,7 @@ typedef enum
  * @brief Enumeration for the audio codec.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_AUDIO_CODEC_DISABLE = -1, /**< Disable audio track */
 	RECORDER_AUDIO_CODEC_AMR = 0,      /**< AMR codec */
 	RECORDER_AUDIO_CODEC_AAC,          /**< AAC codec */
@@ -121,8 +116,7 @@ typedef enum
  * @brief Enumeration for the video codec.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_VIDEO_CODEC_H263,    /**< H263 codec */
 	RECORDER_VIDEO_CODEC_H264,    /**< H264 codec */
 	RECORDER_VIDEO_CODEC_MPEG4,   /**< MPEG4 codec */
@@ -133,8 +127,7 @@ typedef enum
  * @brief Enumeration for audio capture devices.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_AUDIO_DEVICE_MIC,	/**< Mic device */
 	RECORDER_AUDIO_DEVICE_MODEM,	/**< Modem */
 } recorder_audio_device_e;
@@ -143,8 +136,7 @@ typedef enum
  * @brief Enumeration for the recorder rotation type.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_ROTATION_NONE, /**< No rotation */
 	RECORDER_ROTATION_90,   /**< 90 degree rotation */
 	RECORDER_ROTATION_180,  /**< 180 degree rotation */
@@ -155,8 +147,7 @@ typedef enum
  * @brief Enumeration for the recorder policy.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
+typedef enum {
 	RECORDER_POLICY_NONE = 0,               /**< None */
 	RECORDER_POLICY_SOUND,                  /**< Sound policy (Deprecated since 3.0) */
 	RECORDER_POLICY_SOUND_BY_CALL,          /**< Sound policy by CALL (Deprecated since 3.0) */
@@ -829,8 +820,7 @@ int recorder_get_video_resolution(recorder_h recorder, int *width, int *height);
  * @see	recorder_get_video_resolution()
  * @see	recorder_supported_video_resolution_cb()
  */
-int recorder_foreach_supported_video_resolution(recorder_h recorder,
-                                                recorder_supported_video_resolution_cb foreach_cb, void *user_data);
+int recorder_foreach_supported_video_resolution(recorder_h recorder, recorder_supported_video_resolution_cb foreach_cb, void *user_data);
 
 /**
  * @}
