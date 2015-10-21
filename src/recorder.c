@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <muse_core.h>
 #include <muse_core_msg_json.h>
+#include <mm_camcorder_client.h>
 #include <dlog.h>
 
 #ifdef LOG_TAG
@@ -33,7 +34,7 @@
 #endif
 #define LOG_TAG "TIZEN_N_RECORDER"
 
-static void _client_user_callback(callback_cb_info_s * cb_info, muse_recorder_event_e event )
+static void _client_user_callback(callback_cb_info_s * cb_info, muse_recorder_event_e event)
 {
 	char *recvMsg = cb_info->recvMsg;
 	LOGD("get event %d", event);
@@ -373,6 +374,8 @@ int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
 
 	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
 	if (ret == RECORDER_ERROR_NONE) {
+		char *root_directory = NULL;
+
 		muse_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
 		if (handle == 0) {
 			LOGE("Receiving Handle Failed!!");
@@ -380,12 +383,32 @@ int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
 		} else {
 			pc->remote_handle = handle;
 		}
+
+		if (mm_camcorder_client_get_root_directory(&root_directory) == MM_ERROR_NONE &&
+		    root_directory != NULL) {
+			LOGD("set root directory %s", root_directory);
+
+			muse_recorder_msg_send1(MUSE_RECORDER_API_ATTR_SET_ROOT_DIRECTORY, sock_fd, pc->cb_info, ret, STRING, root_directory);
+			if (ret != RECORDER_ERROR_NONE) {
+				LOGE("failed to set root directory %s", root_directory);
+			}
+		}
+
+		if (root_directory) {
+			free(root_directory);
+			root_directory = NULL;
+		}
+
 		LOGD("recorder create 0x%x", pc->remote_handle);
+
 		*recorder = (recorder_h) pc;
-	} else
+	} else {
 		goto ErrorExit;
-	LOGD("ret : 0x%x", ret);
-	return ret;
+	}
+
+	LOGD("done");
+
+	return RECORDER_ERROR_NONE;
 
 ErrorExit:
 	g_free(pc);
@@ -411,6 +434,7 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 	int recorder_type = MUSE_RECORDER_TYPE_AUDIO;
 
 	LOGW("Enter");
+
 	sock_fd = muse_core_client_new();
 	sndMsg = muse_core_msg_json_factory_new(api,
 					      MUSE_TYPE_INT, "module", muse_module,
@@ -429,7 +453,9 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 	pc->cb_info = _client_callback_new(sock_fd);
 	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
 	if (ret == RECORDER_ERROR_NONE) {
+		char *root_directory = NULL;
 		intptr_t handle = 0;
+
 		muse_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
 		if (handle == 0) {
 			LOGE("Receiving Handle Failed!!");
@@ -437,12 +463,32 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 		} else {
 			pc->remote_handle = handle;
 		}
+
+		if (mm_camcorder_client_get_root_directory(&root_directory) == MM_ERROR_NONE &&
+		    root_directory != NULL) {
+			LOGD("set root directory %s", root_directory);
+
+			muse_recorder_msg_send1(MUSE_RECORDER_API_ATTR_SET_ROOT_DIRECTORY, sock_fd, pc->cb_info, ret, STRING, root_directory);
+			if (ret != RECORDER_ERROR_NONE) {
+				LOGE("failed to set root directory %s", root_directory);
+			}
+		}
+
+		if (root_directory) {
+			free(root_directory);
+			root_directory = NULL;
+		}
+
 		LOGD("recorder create 0x%x", pc->remote_handle);
+
 		*recorder = (recorder_h)pc;
-	} else
+	} else {
 		goto ErrorExit;
-	LOGD("ret : 0x%x", ret);
-	return ret;
+	}
+
+	LOGD("done");
+
+	return RECORDER_ERROR_NONE;
 
 ErrorExit:
 	g_free(pc);

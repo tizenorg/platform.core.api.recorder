@@ -1,6 +1,6 @@
 Name:       capi-media-recorder
 Summary:    A Recorder library in Tizen Native API
-Version:    0.2.7
+Version:    0.2.8
 Release:    0
 Group:      Multimedia/API
 License:    Apache-2.0
