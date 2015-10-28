@@ -419,30 +419,38 @@ ErrorExit:
 
 int recorder_create_audiorecorder(recorder_h *recorder)
 {
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
-
 	int sock_fd = -1;
+	int pid = 0;
 	char *sndMsg;
 	int ret = RECORDER_ERROR_NONE;
 	recorder_cli_s *pc = NULL;
-
 	muse_recorder_api_e api = MUSE_RECORDER_API_CREATE;
 	muse_core_api_module_e muse_module = MUSE_RECORDER;
 	int recorder_type = MUSE_RECORDER_TYPE_AUDIO;
 
 	LOGW("Enter");
 
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	sock_fd = muse_core_client_new();
+	if (sock_fd < 0) {
+		LOGE("muse_core_client_new failed - returned fd %d", sock_fd);
+		return RECORDER_ERROR_INVALID_OPERATION;
+	}
+
+	pid = getpid();
 	sndMsg = muse_core_msg_json_factory_new(api,
-					      MUSE_TYPE_INT, "module", muse_module,
-					      MUSE_TYPE_INT, PARAM_RECORDER_TYPE, recorder_type,
-					      0);
+	                                        MUSE_TYPE_INT, "module", muse_module,
+	                                        MUSE_TYPE_INT, PARAM_RECORDER_TYPE, recorder_type,
+	                                        MUSE_TYPE_INT, "pid", pid,
+	                                        0);
+
+	LOGD("sock_fd : %d, msg : %s", sock_fd, sndMsg);
 
 	muse_core_ipc_send_msg(sock_fd, sndMsg);
-	LOGD("sock_fd : %d, msg : %s", sock_fd, sndMsg);
 	muse_core_msg_json_factory_free(sndMsg);
 
 	pc = g_new0(recorder_cli_s, 1);
