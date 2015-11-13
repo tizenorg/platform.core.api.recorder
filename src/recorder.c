@@ -34,6 +34,53 @@
 #endif
 #define LOG_TAG "TIZEN_N_RECORDER"
 
+
+static int _recorder_import_tbm_key(tbm_bufmgr bufmgr, unsigned int tbm_key, tbm_bo *bo, tbm_bo_handle *bo_handle)
+{
+	tbm_bo tmp_bo = NULL;
+	tbm_bo_handle tmp_bo_handle = {NULL, };
+
+	if (bufmgr == NULL || bo == NULL || bo_handle == NULL || tbm_key == 0) {
+		LOGE("invalid parameter - bufmgr %p, bo %p, bo_handle %p, key %d",
+		     bufmgr, bo, bo_handle, tbm_key);
+		return false;
+	}
+
+	tmp_bo = tbm_bo_import(bufmgr, tbm_key);
+	if (tmp_bo == NULL) {
+		LOGE("bo import failed - bufmgr %p, key %d", bufmgr, tbm_key);
+		return false;
+	}
+
+	tmp_bo_handle = tbm_bo_map(tmp_bo, TBM_DEVICE_CPU, TBM_OPTION_READ);
+	if (tmp_bo_handle.ptr == NULL) {
+		LOGE("bo map failed %p", tmp_bo);
+		tbm_bo_unref(tmp_bo);
+		tmp_bo = NULL;
+		return false;
+	}
+
+	/* set bo and bo_handle */
+	*bo = tmp_bo;
+	*bo_handle = tmp_bo_handle;
+
+	return true;
+}
+
+static void _recorder_release_imported_bo(tbm_bo *bo)
+{
+	if (bo == NULL || *bo == NULL) {
+		LOGW("NULL bo");
+		return;
+	}
+
+	tbm_bo_unmap(*bo);
+	tbm_bo_unref(*bo);
+	*bo = NULL;
+
+	return;
+}
+
 static void _client_user_callback(callback_cb_info_s * cb_info, muse_recorder_event_e event)
 {
 	char *recvMsg = cb_info->recvMsg;
@@ -42,136 +89,154 @@ static void _client_user_callback(callback_cb_info_s * cb_info, muse_recorder_ev
 	switch (event) {
 		case MUSE_RECORDER_EVENT_TYPE_STATE_CHANGE:
 		{
-			int cb_previous, cb_current, cb_by_policy;
-			muse_recorder_msg_get(cb_previous, recvMsg);
-			muse_recorder_msg_get(cb_current, recvMsg);
-			muse_recorder_msg_get(cb_by_policy, recvMsg);
-			((recorder_state_changed_cb)cb_info->user_cb[event])((recorder_state_e)cb_previous,
-													(recorder_state_e)cb_current,
-													(bool)cb_by_policy,
-													cb_info->user_data[event]);
+			int previous = 0;
+			int current = 0;
+			int by_policy = 0;
+
+			muse_recorder_msg_get(previous, recvMsg);
+			muse_recorder_msg_get(current, recvMsg);
+			muse_recorder_msg_get(by_policy, recvMsg);
+
+			((recorder_state_changed_cb)cb_info->user_cb[event])((recorder_state_e)previous,
+			                                                     (recorder_state_e)current,
+			                                                     (bool)by_policy,
+			                                                     cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_RECORDING_LIMITED:
 		{
-			int cb_type;
-			muse_recorder_msg_get(cb_type, recvMsg);
-			((recorder_recording_limit_reached_cb)cb_info->user_cb[event])((recorder_recording_limit_type_e)cb_type,
-															cb_info->user_data[event]);
+			int type = 0;
+
+			muse_recorder_msg_get(type, recvMsg);
+
+			((recorder_recording_limit_reached_cb)cb_info->user_cb[event])((recorder_recording_limit_type_e)type,
+			                                                               cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_RECORDING_STATUS:
 		{
-			double cb_elapsed_time;
-			double cb_file_size;
+			int64_t cb_elapsed_time = 0;
+			int64_t cb_file_size = 0;
+
 			muse_recorder_msg_get(cb_elapsed_time, recvMsg);
 			muse_recorder_msg_get(cb_file_size, recvMsg);
+
 			((recorder_recording_status_cb)cb_info->user_cb[event])((unsigned long long)cb_elapsed_time,
-															(unsigned long long)cb_file_size,
-															cb_info->user_data[event]);
+			                                                        (unsigned long long)cb_file_size,
+			                                                        cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_INTERRUPTED:
 		{
-			int cb_policy, cb_previous, cb_current;
-			muse_recorder_msg_get(cb_policy, recvMsg);
-			muse_recorder_msg_get(cb_previous, recvMsg);
-			muse_recorder_msg_get(cb_current, recvMsg);
-			((recorder_interrupted_cb)cb_info->user_cb[event])((recorder_policy_e)cb_policy,
-														(recorder_state_e)cb_previous,
-														(recorder_state_e)cb_current,
-														cb_info->user_data[event]);
+			int policy = 0;
+			int previous = 0;
+			int current = 0;
+
+			muse_recorder_msg_get(policy, recvMsg);
+			muse_recorder_msg_get(previous, recvMsg);
+			muse_recorder_msg_get(current, recvMsg);
+
+			((recorder_interrupted_cb)cb_info->user_cb[event])((recorder_policy_e)policy,
+			                                                   (recorder_state_e)previous,
+			                                                   (recorder_state_e)current,
+			                                                   cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_AUDIO_STREAM:
 		{
-			muse_recorder_transport_info_s transport_info;
-			int tKey = 0;
-			int cb_size = 0;
-			int cb_format;
-			int cb_channel;
-			int cb_timestamp;
-			unsigned char *stream = NULL;
-			muse_recorder_msg_get(tKey, recvMsg);
+			int tbm_key = 0;
+			int size = 0;
+			int format = 0;
+			int channel = 0;
+			int timestamp = 0;
+			tbm_bo bo = NULL;
+			tbm_bo_handle bo_handle = {.ptr = NULL};
 
-			if (tKey != 0) {
-				transport_info.tbm_key = tKey;
-				LOGE("Read key_info INFO : %d", transport_info.tbm_key);
-
-				if(muse_recorder_ipc_init_tbm(&transport_info) == FALSE) {
-					LOGE("Initialize TBM ERROR!!");
-					break;
-				}
-
-				if(muse_recorder_ipc_import_tbm(&transport_info) == FALSE) {
-					LOGE("Import TBM Key ERROR!!");
-					break;
-				} else {
-					muse_recorder_msg_get(cb_size, recvMsg);
-					if (cb_size > 0) {
-						stream = (unsigned char *)transport_info.bo_handle.ptr;
-					}
-				}
-			} else {
-				LOGE("Get KEY INFO sock msg ERROR!!");
+			muse_recorder_msg_get(tbm_key, recvMsg);
+			if (tbm_key == 0) {
+				LOGE("invalid key");
 				break;
 			}
-			muse_recorder_msg_get(cb_format, recvMsg);
-			muse_recorder_msg_get(cb_channel, recvMsg);
-			muse_recorder_msg_get(cb_timestamp, recvMsg);
-			((recorder_audio_stream_cb)cb_info->user_cb[event])((void *)stream,
-													cb_size,
-													(audio_sample_type_e)cb_format,
-													cb_channel,
-													(unsigned int)cb_timestamp,
-													cb_info->user_data[event]);
-			//unref tbm after hand over the buffer.
-			muse_recorder_ipc_unref_tbm(&transport_info);
+
+			if (!_recorder_import_tbm_key(cb_info->bufmgr, tbm_key, &bo, &bo_handle)) {
+				LOGE("tbm key %d import failed", tbm_key);
+				break;
+			}
+
+			muse_recorder_msg_get(size, recvMsg);
+			muse_recorder_msg_get(format, recvMsg);
+			muse_recorder_msg_get(channel, recvMsg);
+			muse_recorder_msg_get(timestamp, recvMsg);
+
+			((recorder_audio_stream_cb)cb_info->user_cb[event])((void *)bo_handle.ptr,
+			                                                    size,
+			                                                    (audio_sample_type_e)format,
+			                                                    channel,
+			                                                    (unsigned int)timestamp,
+			                                                    cb_info->user_data[event]);
+
+			/* release imported bo */
+			_recorder_release_imported_bo(&bo);
+
+			/* return buffer */
+			muse_recorder_msg_send1_no_return(MUSE_RECORDER_API_RETURN_BUFFER,
+			                                  cb_info->fd, cb_info,
+			                                  INT, tbm_key);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_ERROR:
 		{
-			int cb_error, cb_current_state;
-			muse_recorder_msg_get(cb_error, recvMsg);
-			muse_recorder_msg_get(cb_current_state, recvMsg);
-			((recorder_error_cb)cb_info->user_cb[event])((recorder_error_e)cb_error,
-													(recorder_state_e)cb_current_state,
-													cb_info->user_data[event]);
+			int error = 0;
+			int current_state = 0;
+
+			muse_recorder_msg_get(error, recvMsg);
+			muse_recorder_msg_get(current_state, recvMsg);
+
+			((recorder_error_cb)cb_info->user_cb[event])((recorder_error_e)error,
+			                                             (recorder_state_e)current_state,
+			                                             cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_AUDIO_ENCODER:
 		{
-			int cb_codec;
-			muse_recorder_msg_get(cb_codec, recvMsg);
-			((recorder_supported_audio_encoder_cb)cb_info->user_cb[event])((recorder_audio_codec_e)cb_codec,
-																	cb_info->user_data[event]);
+			int codec = 0;
+
+			muse_recorder_msg_get(codec, recvMsg);
+
+			((recorder_supported_audio_encoder_cb)cb_info->user_cb[event])((recorder_audio_codec_e)codec,
+			                                                               cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_FILE_FORMAT:
 		{
-			int cb_format;
-			muse_recorder_msg_get(cb_format, recvMsg);
-			((recorder_supported_file_format_cb)cb_info->user_cb[event])((recorder_file_format_e)cb_format,
-																	cb_info->user_data[event]);
+			int format = 0;
+
+			muse_recorder_msg_get(format, recvMsg);
+
+			((recorder_supported_file_format_cb)cb_info->user_cb[event])((recorder_file_format_e)format,
+			                                                             cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_ENCODER:
 		{
-			int cb_codec;
-			muse_recorder_msg_get(cb_codec, recvMsg);
-			((recorder_supported_video_encoder_cb)cb_info->user_cb[event])((recorder_video_codec_e)cb_codec,
-																	cb_info->user_data[event]);
+			int codec = 0;
+
+			muse_recorder_msg_get(codec, recvMsg);
+
+			((recorder_supported_video_encoder_cb)cb_info->user_cb[event])((recorder_video_codec_e)codec,
+			                                                               cb_info->user_data[event]);
 			break;
 		}
 		case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_RESOLUTION:
 		{
-			int width;
-			int height;
+			int width = 0;
+			int height = 0;
+
 			muse_recorder_msg_get(width, recvMsg);
 			muse_recorder_msg_get(height, recvMsg);
-			((recorder_supported_video_resolution_cb)cb_info->user_cb[event])(width,
-																	height,
-																	cb_info->user_data[event]);
+
+			((recorder_supported_video_resolution_cb)cb_info->user_cb[event])(width, height,
+			                                                                  cb_info->user_data[event]);
 			break;
 		}
 
@@ -184,61 +249,109 @@ static void _client_user_callback(callback_cb_info_s * cb_info, muse_recorder_ev
 
 static void *_client_cb_handler(gpointer data)
 {
-	int ret;
-	int api;
+	int ret = 0;
+	int api = 0;
 	int num_token = 0;
 	int i = 0;
 	int str_pos = 0;
 	int prev_pos = 0;
 	callback_cb_info_s *cb_info = data;
-	char *recvMsg = cb_info->recvMsg;
-	char parseStr[RECORDER_PARSE_STRING_SIZE][MUSE_RECORDER_MSG_MAX_LENGTH] = {{0,0},};
+	char *recvMsg = NULL;
+	char **parseStr = NULL;
+
+	if (cb_info == NULL) {
+		LOGE("cb_info NULL");
+		return NULL;
+	}
+
+	parseStr = (char **)malloc(sizeof(char *) * RECORDER_PARSE_STRING_SIZE);
+	if (parseStr == NULL) {
+		LOGE("parseStr malloc failed");
+		return NULL;
+	}
+
+	for (i = 0 ; i < RECORDER_PARSE_STRING_SIZE ; i++) {
+		parseStr[i] = (char *)malloc(sizeof(char) * MUSE_RECORDER_MSG_MAX_LENGTH);
+		if (parseStr[i] == NULL) {
+			LOGE("parseStr[%d] malloc failed", i);
+			goto CB_HANDLER_EXIT;
+		}
+	}
+
+	recvMsg = cb_info->recvMsg;
 
 	while (g_atomic_int_get(&cb_info->running)) {
 		ret = muse_core_ipc_recv_msg(cb_info->fd, recvMsg);
 		if (ret <= 0)
 			break;
 		recvMsg[ret] = '\0';
+
 		str_pos = 0;
 		prev_pos = 0;
 		num_token = 0;
-		memset(parseStr, 0, RECORDER_PARSE_STRING_SIZE * MUSE_RECORDER_MSG_MAX_LENGTH);
+
 		LOGD("recvMSg : %s, length : %d", recvMsg, ret);
 
 		/* Need to split the combined entering msgs.
 		    This module supports up to 5 combined msgs. */
 		for (str_pos = 0; str_pos < ret; str_pos++) {
 			if(recvMsg[str_pos] == '}') {
+				memset(parseStr[num_token], 0x0, sizeof(char) * MUSE_RECORDER_MSG_MAX_LENGTH);
 				strncpy(&(parseStr[num_token][0]), recvMsg + prev_pos, str_pos - prev_pos + 1);
 				LOGD("splitted msg : %s, Index : %d", &(parseStr[num_token][0]), num_token);
 				prev_pos = str_pos+1;
 				num_token++;
 			}
 		}
-		LOGD("num_token : %d", num_token);
-		/* Re-construct to the useful single msg. */
-		for (i = 0; i < num_token; i++) {
 
-			if (i >= RECORDER_PARSE_STRING_SIZE)
+		LOGD("num_token : %d", num_token);
+
+		/* Re-construct to the useful single msg. */
+		for (i = 0 ; i < num_token ; i++) {
+			if (i >= RECORDER_PARSE_STRING_SIZE) {
+				LOGE("invalid index %d", i);
 				break;
+			}
+
 			if (muse_recorder_msg_get(api, &(parseStr[i][0]))) {
 				if(api < MUSE_RECORDER_API_MAX){
 					LOGD("api : %d, wait ends.", api);
+
 					g_mutex_lock(&(cb_info->pMutex[api]));
+
 					/* The api msgs should be distinguished from the event msg. */
 					memset(cb_info->recvApiMsg, 0, strlen(cb_info->recvApiMsg));
 					strcpy(cb_info->recvApiMsg, &(parseStr[i][0]));
+
 					LOGD("cb_info->recvApiMsg : %s", cb_info->recvApiMsg);
+
 					cb_info->activating[api] = 1;
-					g_cond_signal(&(cb_info->pCond[api]));
-					g_mutex_unlock(&(cb_info->pMutex[api]));
-					if(api == MUSE_RECORDER_API_DESTROY) {
-						g_atomic_int_set(&cb_info->running, 0);
-						LOGD("close client cb handler");
+
+					if (api == MUSE_RECORDER_API_CREATE) {
+						if (muse_recorder_msg_get(ret, cb_info->recvApiMsg)) {
+							if (ret != RECORDER_ERROR_NONE) {
+								g_atomic_int_set(&cb_info->running, 0);
+								LOGE("recorder create error 0x%x. close client cb handler", ret);
+							}
+						} else {
+							LOGE("failed to get api return");
+						}
+					} else if (api == MUSE_RECORDER_API_DESTROY) {
+						if (muse_recorder_msg_get(ret, cb_info->recvApiMsg)) {
+							if (ret == RECORDER_ERROR_NONE) {
+								g_atomic_int_set(&cb_info->running, 0);
+								LOGD("recorder destroy done. close client cb handler");
+							}
+						} else {
+							LOGE("failed to get api return");
+						}
 					}
 
-				} else if(api == MUSE_RECORDER_CB_EVENT) {
-					int event;
+					g_cond_signal(&(cb_info->pCond[api]));
+					g_mutex_unlock(&(cb_info->pMutex[api]));
+				} else if (api == MUSE_RECORDER_CB_EVENT) {
+					int event = -1;
+
 					if (muse_recorder_msg_get(event, &(parseStr[i][0]))) {
 						LOGD("go callback : %d", event);
 						_client_user_callback(cb_info, event);
@@ -249,34 +362,90 @@ static void *_client_cb_handler(gpointer data)
 			}
 		}
 	}
+
 	LOGD("client cb exit");
+
+CB_HANDLER_EXIT:
+	if (parseStr) {
+		for (i = 0 ; i < RECORDER_PARSE_STRING_SIZE ; i++) {
+			if (parseStr[i]) {
+				free(parseStr[i]);
+				parseStr[i] = NULL;
+			}
+		}
+
+		free(parseStr);
+		parseStr = NULL;
+	}
 
 	return NULL;
 }
 
 static callback_cb_info_s *_client_callback_new(gint sockfd)
 {
-	callback_cb_info_s *cb_info;
-	GCond *recorder_cond;
-	GMutex *recorder_mutex;
-	gint *recorder_activ;
+	callback_cb_info_s *cb_info = NULL;
+	GCond *recorder_cond = NULL;
+	GMutex *recorder_mutex = NULL;
+	gint *recorder_activ = NULL;
 	g_return_val_if_fail(sockfd > 0, NULL);
 
 	cb_info = g_new0(callback_cb_info_s, 1);
+	if (cb_info == NULL) {
+		LOGE("cb_info_s alloc failed");
+		goto _ERR_RECORDER_EXIT;
+	}
+
 	recorder_cond = g_new0(GCond, MUSE_RECORDER_API_MAX);
+	if (recorder_cond == NULL) {
+		LOGE("recorder_cond alloc failed");
+		goto _ERR_RECORDER_EXIT;
+	}
 	recorder_mutex = g_new0(GMutex, MUSE_RECORDER_API_MAX);
+	if (recorder_mutex == NULL) {
+		LOGE("recorder_mutex alloc failed");
+		goto _ERR_RECORDER_EXIT;
+	}
 	recorder_activ = g_new0(gint, MUSE_RECORDER_API_MAX);
+	if (recorder_activ == NULL) {
+		LOGE("recorder_activ alloc failed");
+		goto _ERR_RECORDER_EXIT;
+	}
 
 	g_atomic_int_set(&cb_info->running, 1);
 	cb_info->fd = sockfd;
 	cb_info->pCond = recorder_cond;
 	cb_info->pMutex = recorder_mutex;
 	cb_info->activating = recorder_activ;
-	cb_info->thread =
-		g_thread_new("callback_thread", _client_cb_handler,
-			     (gpointer) cb_info);
+	cb_info->thread = g_thread_try_new("callback_thread",
+	                                   _client_cb_handler,
+	                                   (gpointer)cb_info,
+	                                   NULL);
+	if (cb_info->thread == NULL) {
+		LOGE("thread create failed");
+		goto _ERR_RECORDER_EXIT;
+	}
 
 	return cb_info;
+
+_ERR_RECORDER_EXIT:
+	if (cb_info) {
+		g_free(cb_info);
+		cb_info = NULL;
+	}
+	if (recorder_cond) {
+		g_free(recorder_cond);
+		recorder_cond = NULL;
+	}
+	if (recorder_mutex) {
+		g_free(recorder_mutex);
+		recorder_mutex = NULL;
+	}
+	if (recorder_activ) {
+		g_free(recorder_activ);
+		recorder_activ = NULL;
+	}
+
+	return NULL;
 }
 
 static int client_wait_for_cb_return(muse_recorder_api_e api, callback_cb_info_s *cb_info, int time_out)
@@ -317,193 +486,173 @@ static void _client_callback_destroy(callback_cb_info_s * cb_info)
 {
 	g_return_if_fail(cb_info != NULL);
 
-	LOGI("%p Callback destroyed", cb_info->thread);
+	LOGD("destroy thread %p", cb_info->thread);
+
 	g_thread_join(cb_info->thread);
 	g_thread_unref(cb_info->thread);
 
-
 	if (cb_info->pCond) {
 		g_free(cb_info->pCond);
+		cb_info->pCond = NULL;
 	}
 	if (cb_info->pMutex) {
 		g_free(cb_info->pMutex);
+		cb_info->pMutex = NULL;
 	}
+
 	g_free(cb_info);
+	cb_info = NULL;
+
+	return;
 }
 
-int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
+static int _recorder_create_common(recorder_h *recorder, muse_recorder_type_e type, camera_h camera)
 {
-	if (camera == NULL) {
-		LOGE("NULL pointer camera handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
+	int ret = RECORDER_ERROR_NONE;
+	int destroy_ret = RECORDER_ERROR_NONE;
+	int sock_fd = -1;
+	char *send_msg = NULL;
+	char *root_directory = NULL;
+	intptr_t camera_handle = 0;
+	intptr_t handle = 0;
+	tbm_bufmgr bufmgr = NULL;
+	recorder_cli_s *pc = NULL;
+
+	LOGD("Enter - type %d", type);
+
 	if (recorder == NULL) {
-		LOGE("NULL pointer recorder handle");
+		LOGE("NULL pointer for recorder handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	int sock_fd = -1;
-	char *sndMsg;
-	int ret = RECORDER_ERROR_NONE;
-	camera_cli_s *camera_pc = (camera_cli_s *)camera;
-	recorder_cli_s *pc;
-	muse_recorder_api_e api = MUSE_RECORDER_API_CREATE;
-	muse_core_api_module_e muse_module = MUSE_RECORDER;
-	intptr_t camera_handle = (intptr_t)camera_pc->remote_handle;
-	intptr_t handle;
-	int recorder_type = MUSE_RECORDER_TYPE_VIDEO;
+	if (type == MUSE_RECORDER_TYPE_VIDEO && camera == NULL) {
+		LOGE("NULL pointer for camera handle on video recorder mode");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	bufmgr = tbm_bufmgr_init(-1);
+	if (bufmgr == NULL) {
+		LOGE("get tbm bufmgr failed");
+		return RECORDER_ERROR_INVALID_OPERATION;
+	}
 
 	pc = g_new0(recorder_cli_s, 1);
 	if (pc == NULL) {
-		return 0;
-	}
-
-	LOGD("remote handle : 0x%x", camera_handle);
-	sock_fd = muse_core_client_new();
-	sndMsg = muse_core_msg_json_factory_new(api,
-					      MUSE_TYPE_INT, "module", muse_module,
-					      MUSE_TYPE_INT, PARAM_RECORDER_TYPE, recorder_type,
-					      MUSE_TYPE_POINTER, "camera_handle", camera_handle,
-					      0);
-	muse_core_ipc_send_msg(sock_fd, sndMsg);
-	LOGD("sock_fd : %d, msg : %s", sock_fd, sndMsg);
-	muse_core_msg_json_factory_free(sndMsg);
-
-	pc->cb_info = _client_callback_new(sock_fd);
-	LOGD("cb info : %d", pc->cb_info->fd);
-
-	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
-	if (ret == RECORDER_ERROR_NONE) {
-		char *root_directory = NULL;
-
-		muse_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
-		if (handle == 0) {
-			LOGE("Receiving Handle Failed!!");
-			goto ErrorExit;
-		} else {
-			pc->remote_handle = handle;
-		}
-
-		if (mm_camcorder_client_get_root_directory(&root_directory) == MM_ERROR_NONE &&
-		    root_directory != NULL) {
-			LOGD("set root directory %s", root_directory);
-
-			muse_recorder_msg_send1(MUSE_RECORDER_API_ATTR_SET_ROOT_DIRECTORY, sock_fd, pc->cb_info, ret, STRING, root_directory);
-			if (ret != RECORDER_ERROR_NONE) {
-				LOGE("failed to set root directory %s", root_directory);
-			}
-		}
-
-		if (root_directory) {
-			free(root_directory);
-			root_directory = NULL;
-		}
-
-		LOGD("recorder create 0x%x", pc->remote_handle);
-
-		*recorder = (recorder_h) pc;
-	} else {
-		goto ErrorExit;
-	}
-
-	LOGD("done");
-
-	return RECORDER_ERROR_NONE;
-
-ErrorExit:
-	g_free(pc);
-	LOGD("ErrorExit!!! ret value : %d", ret);
-	return ret;
-}
-
-
-int recorder_create_audiorecorder(recorder_h *recorder)
-{
-	int sock_fd = -1;
-	int pid = 0;
-	char *sndMsg;
-	int ret = RECORDER_ERROR_NONE;
-	recorder_cli_s *pc = NULL;
-	muse_recorder_api_e api = MUSE_RECORDER_API_CREATE;
-	muse_core_api_module_e muse_module = MUSE_RECORDER;
-	int recorder_type = MUSE_RECORDER_TYPE_AUDIO;
-
-	LOGW("Enter");
-
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
+		ret = RECORDER_ERROR_OUT_OF_MEMORY;
+		goto _ERR_RECORDER_EXIT;
 	}
 
 	sock_fd = muse_core_client_new();
 	if (sock_fd < 0) {
 		LOGE("muse_core_client_new failed - returned fd %d", sock_fd);
-		return RECORDER_ERROR_INVALID_OPERATION;
+		ret = RECORDER_ERROR_INVALID_OPERATION;
+		goto _ERR_RECORDER_EXIT;
 	}
 
-	pid = getpid();
-	sndMsg = muse_core_msg_json_factory_new(api,
-	                                        MUSE_TYPE_INT, "module", muse_module,
-	                                        MUSE_TYPE_INT, PARAM_RECORDER_TYPE, recorder_type,
-	                                        MUSE_TYPE_INT, "pid", pid,
-	                                        0);
-
-	LOGD("sock_fd : %d, msg : %s", sock_fd, sndMsg);
-
-	muse_core_ipc_send_msg(sock_fd, sndMsg);
-	muse_core_msg_json_factory_free(sndMsg);
-
-	pc = g_new0(recorder_cli_s, 1);
-	if (pc == NULL) {
-		return 0;
+	if (type == MUSE_RECORDER_TYPE_AUDIO) {
+		send_msg = muse_core_msg_json_factory_new(MUSE_RECORDER_API_CREATE,
+		                                          MUSE_TYPE_INT, "module", MUSE_RECORDER,
+		                                          MUSE_TYPE_INT, PARAM_RECORDER_TYPE, MUSE_RECORDER_TYPE_AUDIO,
+		                                          MUSE_TYPE_INT, "pid", getpid(),
+		                                          0);
+	} else {
+		camera_handle = (intptr_t)((camera_cli_s *)camera)->remote_handle;
+		send_msg = muse_core_msg_json_factory_new(MUSE_RECORDER_API_CREATE,
+		                                          MUSE_TYPE_INT, "module", MUSE_RECORDER,
+		                                          MUSE_TYPE_INT, PARAM_RECORDER_TYPE, MUSE_RECORDER_TYPE_VIDEO,
+		                                          MUSE_TYPE_POINTER, "camera_handle", camera_handle,
+		                                          0);
 	}
+
+	LOGD("sock_fd : %d, msg : %s", sock_fd, send_msg);
+
+	muse_core_ipc_send_msg(sock_fd, send_msg);
+	muse_core_msg_json_factory_free(send_msg);
 
 	pc->cb_info = _client_callback_new(sock_fd);
-	ret = client_wait_for_cb_return(api, pc->cb_info, CALLBACK_TIME_OUT);
-	if (ret == RECORDER_ERROR_NONE) {
-		char *root_directory = NULL;
-		intptr_t handle = 0;
+	if (pc->cb_info == NULL) {
+		ret = RECORDER_ERROR_OUT_OF_MEMORY;
+		goto _ERR_RECORDER_EXIT;
+	}
 
+	ret = client_wait_for_cb_return(MUSE_RECORDER_API_CREATE, pc->cb_info, CALLBACK_TIME_OUT);
+	if (ret == RECORDER_ERROR_NONE) {
 		muse_recorder_msg_get_pointer(handle, pc->cb_info->recvMsg);
 		if (handle == 0) {
 			LOGE("Receiving Handle Failed!!");
-			goto ErrorExit;
-		} else {
-			pc->remote_handle = handle;
+			goto _ERR_RECORDER_EXIT;
 		}
 
-		if (mm_camcorder_client_get_root_directory(&root_directory) == MM_ERROR_NONE &&
-		    root_directory != NULL) {
-			LOGD("set root directory %s", root_directory);
-
-			muse_recorder_msg_send1(MUSE_RECORDER_API_ATTR_SET_ROOT_DIRECTORY, sock_fd, pc->cb_info, ret, STRING, root_directory);
-			if (ret != RECORDER_ERROR_NONE) {
-				LOGE("failed to set root directory %s", root_directory);
-			}
+		if (mm_camcorder_client_get_root_directory(&root_directory) != MM_ERROR_NONE ||
+		    root_directory == NULL) {
+			LOGE("failed to get root directory of internal storage");
+			ret = RECORDER_ERROR_INVALID_OPERATION;
+			goto _ERR_RECORDER_AFTER_CREATE;
 		}
 
-		if (root_directory) {
-			free(root_directory);
-			root_directory = NULL;
+		LOGD("set root directory [%s]", root_directory);
+
+		muse_recorder_msg_send1(MUSE_RECORDER_API_ATTR_SET_ROOT_DIRECTORY,
+		                        sock_fd, pc->cb_info, ret, STRING, root_directory);
+		if (ret != RECORDER_ERROR_NONE) {
+			LOGE("failed to set root directory %s", root_directory);
+			ret = RECORDER_ERROR_INVALID_OPERATION;
+			goto _ERR_RECORDER_AFTER_CREATE;
 		}
 
-		LOGD("recorder create 0x%x", pc->remote_handle);
+		free(root_directory);
+		root_directory = NULL;
 
-		*recorder = (recorder_h)pc;
+		pc->remote_handle = handle;
+		pc->cb_info->bufmgr = bufmgr;
+
+		LOGD("recorder[type %d] %p create success : remote handle 0x%x",
+		     type, pc, pc->remote_handle);
+
+		*recorder = (recorder_h) pc;
 	} else {
-		goto ErrorExit;
+		goto _ERR_RECORDER_EXIT;
 	}
 
 	LOGD("done");
 
 	return RECORDER_ERROR_NONE;
 
-ErrorExit:
-	g_free(pc);
-	LOGD("ret value : %d", ret);
+_ERR_RECORDER_AFTER_CREATE:
+	muse_recorder_msg_send(MUSE_RECORDER_API_DESTROY, sock_fd, pc->cb_info, destroy_ret);
+	LOGE("destroy return 0x%x", destroy_ret);
+
+_ERR_RECORDER_EXIT:
+	tbm_bufmgr_deinit(bufmgr);
+	bufmgr = NULL;
+
+	if (root_directory) {
+		free(root_directory);
+		root_directory = NULL;
+	}
+
+	if (pc) {
+		if (pc->cb_info) {
+			_client_callback_destroy(pc->cb_info);
+			pc->cb_info = NULL;
+		}
+		g_free(pc);
+		pc = NULL;
+	}
+
 	return ret;
 }
 
+int recorder_create_videorecorder(camera_h camera, recorder_h *recorder)
+{
+	return _recorder_create_common(recorder, MUSE_RECORDER_TYPE_VIDEO, camera);
+}
+
+
+int recorder_create_audiorecorder(recorder_h *recorder)
+{
+	return _recorder_create_common(recorder, MUSE_RECORDER_TYPE_AUDIO, NULL);
+}
 
 int recorder_get_state(recorder_h recorder, recorder_state_e *state)
 {
@@ -529,13 +678,16 @@ int recorder_get_state(recorder_h recorder, recorder_state_e *state)
 	int get_state;
 
 	LOGD("Enter, remote_handle : %x", pc->remote_handle);
+
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 
 	if (ret == RECORDER_ERROR_NONE) {
 		muse_recorder_msg_get(get_state, pc->cb_info->recvMsg);
 		*state = (recorder_state_e)get_state;
 	}
+
 	LOGD("ret : 0x%x, get_state : %d", ret, get_state);
+
 	return ret;
 }
 
@@ -836,7 +988,7 @@ int recorder_get_audio_level(recorder_h recorder, double *level)
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_level, pc->cb_info->recvMsg);
+		muse_recorder_msg_get_double(get_level, pc->cb_info->recvMsg);
 		*level = get_level;
 	}
 	LOGD("ret : 0x%x", ret);
@@ -1949,14 +2101,16 @@ int recorder_attr_set_recording_motion_rate(recorder_h recorder, double rate)
 	}
 	sock_fd = pc->cb_info->fd;
 
-	LOGD("ENTER");
+	LOGD("ENTER - %.20lf", rate);
 
 	muse_recorder_msg_send1(api,
 							sock_fd,
 							pc->cb_info,
 							ret,
 							DOUBLE, rate);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
@@ -1986,10 +2140,10 @@ int recorder_attr_get_recording_motion_rate(recorder_h recorder, double *rate)
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_rate, pc->cb_info->recvMsg);
+		muse_recorder_msg_get_double(get_rate, pc->cb_info->recvMsg);
 		*rate = get_rate;
 	}
-	LOGD("ret : 0x%x", ret);
+	LOGD("ret : 0x%x - rate %.20lf", ret, *rate);
 	return ret;
 }
 

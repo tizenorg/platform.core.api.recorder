@@ -57,6 +57,7 @@ typedef struct _callback_cb_info {
 	GCond *pCond;
 	GMutex *pMutex;
 	gint *activating;
+	tbm_bufmgr bufmgr;
 } callback_cb_info_s;
 
 typedef struct _recorder_cli_s{
