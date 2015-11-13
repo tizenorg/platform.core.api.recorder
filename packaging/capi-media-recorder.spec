@@ -1,7 +1,7 @@
 Name:       capi-media-recorder
-Summary:    A Recorder library in Tizen Native API
-Version:    0.2.9
-Release:    1
+Summary:    A Recorder API
+Version:    0.2.10
+Release:    0
 Group:      Multimedia/API
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
@@ -13,6 +13,8 @@ BuildRequires:  pkgconfig(mmsvc-camera)
 BuildRequires:  pkgconfig(mmsvc-recorder)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(mused)
+BuildRequires:  pkgconfig(evas)
+BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(capi-media-tool)
 BuildRequires:  pkgconfig(capi-media-audio-io)
 BuildRequires:  pkgconfig(mm-camcorder)
@@ -24,12 +26,12 @@ A Recorder library in Tizen Native API
 
 
 %package devel
-Summary:  A Recorder library in Tizen C API (Development)
+Summary:  A Recorder API (Development)
 Requires: %{name} = %{version}-%{release}
 
 
 %description devel
-A Recorder library in Tizen Native API Development Package.
+Development related files for a Recorder library in Tizen Native API.
 
 
 %prep
@@ -61,6 +63,7 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/%{name}
 %manifest capi-media-recorder.manifest
 %{_libdir}/libcapi-media-recorder.so.*
 %{_datadir}/license/%{name}
+%{_bindir}/multimedia_recorder_test
 
 %files devel
 %{_includedir}/media/recorder.h
