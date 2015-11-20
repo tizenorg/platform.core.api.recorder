@@ -29,49 +29,54 @@ extern "C" {
 
 #define RECORDER_PARSE_STRING_SIZE 200
 
-typedef union _mediaSource{
-	camera_h camera;
-}mediasource;
 
-
-typedef enum {
-	_RECORDER_EVENT_TYPE_STATE_CHANGE,
-	_RECORDER_EVENT_TYPE_RECORDING_LIMITED,
-	_RECORDER_EVENT_TYPE_RECORDING_STATUS,
-	_RECORDER_EVENT_TYPE_INTERRUPTED,
-	_RECORDER_EVENT_TYPE_AUDIO_STREAM,
-	_RECORDER_EVENT_TYPE_ERROR,
-	_RECORDER_EVENT_TYPE_NUM
-}_recorder_event_e;
-
-typedef struct _callback_cb_info {
-	GThread *thread;
-	gint running;
+typedef struct _recorder_cb_info_s {
 	gint fd;
+	GThread *msg_recv_thread;
+	GThread *msg_handler_thread;
+	gint msg_recv_running;
+	gint msg_handler_running;
+	GCond msg_handler_cond;
+	GMutex msg_handler_mutex;
+	GQueue *msg_queue;
+	GList *idle_event_list;
+	GCond idle_event_cond;
+	GMutex idle_event_mutex;
 	gpointer user_cb[MUSE_RECORDER_EVENT_TYPE_NUM];
-	gpointer user_cb_completed[MUSE_RECORDER_EVENT_TYPE_NUM];
 	gpointer user_data[MUSE_RECORDER_EVENT_TYPE_NUM];
-	gchar recvMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
-	gchar recvApiMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
-	gchar recvEventMsg[MUSE_RECORDER_MSG_MAX_LENGTH];
-	GCond *pCond;
-	GMutex *pMutex;
-	gint *activating;
+	gchar recv_msg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	GCond *api_cond;
+	GMutex *api_mutex;
+	gint *api_activating;
+	gint *api_ret;
 	tbm_bufmgr bufmgr;
-} callback_cb_info_s;
+} recorder_cb_info_s;
+
+typedef struct _recorder_message_s {
+	gchar recv_msg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	muse_recorder_api_e api;
+} recorder_message_s;
+
+typedef struct _recorder_idle_event_s {
+	recorder_cb_info_s *cb_info;
+	gchar recv_msg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	muse_recorder_event_e event;
+	GMutex event_mutex;
+} recorder_idle_event_s;
 
 typedef struct _recorder_cli_s{
 	intptr_t remote_handle;
-	callback_cb_info_s *cb_info;
-}recorder_cli_s;
+	recorder_cb_info_s *cb_info;
+} recorder_cli_s;
 
 typedef struct _camera_cli_s{
 	intptr_t remote_handle;
 	MMHandleType client_handle;
-	callback_cb_info_s *cb_info;
-}camera_cli_s;
+	void *cb_info;
+} camera_cli_s;
 
 int __convert_recorder_error_code(const char *func, int code);
+
 #ifdef __cplusplus
 }
 #endif

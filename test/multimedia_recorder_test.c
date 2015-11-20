@@ -1525,17 +1525,6 @@ static gboolean mode_change()
                 LOGE("audio recorder create failed 0x%x", err);
                 continue;
             }
-			{
-				double set_rate = 1, get_rate;
-				recorder_attr_set_recording_motion_rate(hcamcorder->recorder, set_rate);
-				recorder_attr_get_recording_motion_rate(hcamcorder->recorder, &get_rate);
-				g_print("set_rate %.20lf, get_rate %.20lf\n", set_rate, get_rate);
-				if (set_rate == get_rate) {
-					g_print("SAME\n");
-				} else {
-					g_print("DIFF\n");
-				}
-			}
 
             err = recorder_attr_set_audio_device(hcamcorder->recorder,RECORDER_AUDIO_DEVICE_MIC);
             if (err != RECORDER_ERROR_NONE) {
