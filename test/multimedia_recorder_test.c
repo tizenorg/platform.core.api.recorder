@@ -93,7 +93,7 @@ void *display;
 #define EXT_AMR                         "amr"
 #define EXT_MKV                         "mkv"
 
-#define TARGET_FILENAME_PATH            "/opt/usr/media/"
+#define TARGET_FILENAME_PATH            "/home/owner/content/Sounds/"
 #define IMAGE_CAPTURE_EXIF_PATH         TARGET_FILENAME_PATH"exif.raw"
 #define TARGET_FILENAME_VIDEO           TARGET_FILENAME_PATH"test_rec_video.mp4"
 #define TARGET_FILENAME_AUDIO           TARGET_FILENAME_PATH"test_rec_audio.m4a"
@@ -540,14 +540,31 @@ void _face_detected(camera_detected_face_s *faces, int count, void *user_data){
     }
 }
 
-void _recording_status_cb(unsigned long long elapsed_time, unsigned long long file_size, void *user_data){
-    //printf("elapsed time :%d , file_size :%d\n", elapsed_time , file_size);
+void _state_changed_cb(recorder_state_e previous_state, recorder_state_e current_state, bool by_policy, void *user_data)
+{
+    printf("\n\tstate changed[by_policy:%d] : %d -> %d\n\n", by_policy, previous_state, current_state);
 }
 
-void _recording_limit_reached_cb(recorder_recording_limit_type_e type, void *user_data){
-    printf("limited!! %d\n", type);
-    int *ischeck = (int*)user_data;
-    *ischeck = 1;
+void _recording_status_cb(unsigned long long elapsed_time, unsigned long long file_size, void *user_data)
+{
+    static unsigned long long elapsed = -1;
+    if (elapsed != elapsed_time / 1000) {
+        unsigned long temp_time;
+        unsigned long long hour, minute, second;
+        elapsed = elapsed_time / 1000;
+        temp_time = elapsed;
+        hour = temp_time / 3600;
+        temp_time = elapsed % 3600;
+        minute = temp_time / 60;
+        second = temp_time % 60;
+        printf("\n\tCurrent Time - %lld:%lld:%lld, filesize %lld KB\n\n",
+                    hour, minute, second, file_size);
+    }
+}
+
+void _recording_limit_reached_cb(recorder_recording_limit_type_e type, void *user_data)
+{
+    printf("\n\tRECORDING LIMIT REACHED [type: %d]\n\n", type);
 }
 
 
@@ -1283,7 +1300,6 @@ static gboolean cmd_input(GIOChannel *channel)
 static gboolean init(int type)
 {
     int err;
-    int ischeck=0;
 
     if (!hcamcorder)
         return FALSE;
@@ -1383,8 +1399,9 @@ static gboolean init(int type)
         }
     }
 
+    recorder_set_state_changed_cb(hcamcorder->recorder, _state_changed_cb, NULL);
     recorder_set_recording_status_cb(hcamcorder->recorder, _recording_status_cb, NULL);
-    recorder_set_recording_limit_reached_cb(hcamcorder->recorder, _recording_limit_reached_cb, &ischeck);
+    recorder_set_recording_limit_reached_cb(hcamcorder->recorder, _recording_limit_reached_cb, NULL);
 
     LOGD("Init DONE.");
 
@@ -1525,17 +1542,6 @@ static gboolean mode_change()
                 LOGE("audio recorder create failed 0x%x", err);
                 continue;
             }
-			{
-				double set_rate = 1, get_rate;
-				recorder_attr_set_recording_motion_rate(hcamcorder->recorder, set_rate);
-				recorder_attr_get_recording_motion_rate(hcamcorder->recorder, &get_rate);
-				g_print("set_rate %.20lf, get_rate %.20lf\n", set_rate, get_rate);
-				if (set_rate == get_rate) {
-					g_print("SAME\n");
-				} else {
-					g_print("DIFF\n");
-				}
-			}
 
             err = recorder_attr_set_audio_device(hcamcorder->recorder,RECORDER_AUDIO_DEVICE_MIC);
             if (err != RECORDER_ERROR_NONE) {
