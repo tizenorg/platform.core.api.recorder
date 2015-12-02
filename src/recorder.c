@@ -1068,20 +1068,16 @@ int recorder_destroy(recorder_h recorder)
 	int ret = RECORDER_ERROR_NONE;
 	muse_recorder_api_e api = MUSE_RECORDER_API_DESTROY;
 	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+	int sock_fd = 0;
+
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)",RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
 
 	LOGD("ENTER");
-
-	if (pc == NULL) {
-		return RECORDER_ERROR_INVALID_OPERATION;
-	} else if (pc->cb_info == NULL) {
-		return RECORDER_ERROR_INVALID_OPERATION;
-	}
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 	if (ret == RECORDER_ERROR_NONE) {
