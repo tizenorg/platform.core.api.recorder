@@ -64,12 +64,12 @@ typedef struct _recorder_idle_event_s {
 	GMutex event_mutex;
 } recorder_idle_event_s;
 
-typedef struct _recorder_cli_s{
+typedef struct _recorder_cli_s {
 	intptr_t remote_handle;
 	recorder_cb_info_s *cb_info;
 } recorder_cli_s;
 
-typedef struct _camera_cli_s{
+typedef struct _camera_cli_s {
 	intptr_t remote_handle;
 	MMHandleType client_handle;
 	void *cb_info;
@@ -81,6 +81,6 @@ int __convert_recorder_error_code(const char *func, int code);
 }
 #endif
 
-#endif //__TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__
+#endif /* __TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__ */
 
 
