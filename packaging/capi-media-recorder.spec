@@ -1,7 +1,7 @@
 Name:       capi-media-recorder
 Summary:    A Recorder API
 Version:    0.2.14
-Release:    1
+Release:    2
 Group:      Multimedia/API
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
