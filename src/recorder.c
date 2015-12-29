@@ -406,20 +406,15 @@ static void *_recorder_msg_handler_func(gpointer data)
 		}
 
 		rec_msg = (recorder_message_s *)g_queue_pop_head(cb_info->msg_queue);
-
 		g_mutex_unlock(&cb_info->msg_handler_mutex);
-
 		if (rec_msg == NULL) {
 			LOGE("NULL message");
 			g_mutex_lock(&cb_info->msg_handler_mutex);
 			continue;
 		}
-
 		api = rec_msg->api;
-
 		if (api < MUSE_RECORDER_API_MAX) {
 			g_mutex_lock(&cb_info->api_mutex[api]);
-
 			if (muse_recorder_msg_get(ret, rec_msg->recv_msg)) {
 				cb_info->api_ret[api] = ret;
 				cb_info->api_activating[api] = 1;
@@ -658,10 +653,9 @@ CB_HANDLER_EXIT:
 static recorder_cb_info_s *_client_callback_new(gint sockfd)
 {
 	recorder_cb_info_s *cb_info = NULL;
-	GCond *tmp_cond = NULL;
-	GMutex *tmp_mutex = NULL;
 	gint *tmp_activating = NULL;
 	gint *tmp_ret = NULL;
+	gint i = 0;
 
 	g_return_val_if_fail(sockfd > 0, NULL);
 
@@ -676,16 +670,9 @@ static recorder_cb_info_s *_client_callback_new(gint sockfd)
 	g_mutex_init(&cb_info->idle_event_mutex);
 	g_cond_init(&cb_info->idle_event_cond);
 
-	tmp_cond = g_new0(GCond, MUSE_RECORDER_API_MAX);
-	if (tmp_cond == NULL) {
-		LOGE("tmp_cond failed");
-		goto ErrorExit;
-	}
-
-	tmp_mutex = g_new0(GMutex, MUSE_RECORDER_API_MAX);
-	if (tmp_mutex == NULL) {
-		LOGE("tmp_mutex failed");
-		goto ErrorExit;
+	for (i = 0 ; i < MUSE_RECORDER_API_MAX ; i++) {
+		g_mutex_init(&cb_info->api_mutex[i]);
+		g_cond_init(&cb_info->api_cond[i]);
 	}
 
 	tmp_activating = g_new0(gint, MUSE_RECORDER_API_MAX);
@@ -717,8 +704,6 @@ static recorder_cb_info_s *_client_callback_new(gint sockfd)
 	}
 
 	cb_info->fd = sockfd;
-	cb_info->api_cond = tmp_cond;
-	cb_info->api_mutex = tmp_mutex;
 	cb_info->api_activating = tmp_activating;
 	cb_info->api_ret = tmp_ret;
 
@@ -748,6 +733,11 @@ ErrorExit:
 			cb_info->msg_handler_thread = NULL;
 		}
 
+		for (i = 0 ; i < MUSE_RECORDER_API_MAX ; i++) {
+			g_mutex_clear(&cb_info->api_mutex[i]);
+			g_cond_clear(&cb_info->api_cond[i]);
+		}
+
 		g_mutex_clear(&cb_info->msg_handler_mutex);
 		g_cond_clear(&cb_info->msg_handler_cond);
 		g_mutex_clear(&cb_info->idle_event_mutex);
@@ -762,14 +752,6 @@ ErrorExit:
 		cb_info = NULL;
 	}
 
-	if (tmp_cond) {
-		g_free(tmp_cond);
-		tmp_cond = NULL;
-	}
-	if (tmp_mutex) {
-		g_free(tmp_mutex);
-		tmp_mutex = NULL;
-	}
 	if (tmp_activating) {
 		g_free(tmp_activating);
 		tmp_activating = NULL;
@@ -817,6 +799,8 @@ static int client_wait_for_cb_return(muse_recorder_api_e api, recorder_cb_info_s
 
 static void _client_callback_destroy(recorder_cb_info_s *cb_info)
 {
+	gint i = 0;
+
 	g_return_if_fail(cb_info != NULL);
 
 	LOGD("MSG receive thread[%p] destroy", cb_info->msg_recv_thread);
@@ -843,19 +827,16 @@ static void _client_callback_destroy(recorder_cb_info_s *cb_info)
 	g_mutex_clear(&cb_info->idle_event_mutex);
 	g_cond_clear(&cb_info->idle_event_cond);
 
+	for (i = 0 ; i < MUSE_RECORDER_API_MAX ; i++) {
+		g_mutex_clear(&cb_info->api_mutex[i]);
+		g_cond_clear(&cb_info->api_cond[i]);
+	}
+
 	LOGD("event thread removed");
 
 	if (cb_info->bufmgr) {
 		tbm_bufmgr_deinit(cb_info->bufmgr);
 		cb_info->bufmgr = NULL;
-	}
-	if (cb_info->api_cond) {
-		g_free(cb_info->api_cond);
-		cb_info->api_cond = NULL;
-	}
-	if (cb_info->api_mutex) {
-		g_free(cb_info->api_mutex);
-		cb_info->api_mutex = NULL;
 	}
 	if (cb_info->api_activating) {
 		g_free(cb_info->api_activating);

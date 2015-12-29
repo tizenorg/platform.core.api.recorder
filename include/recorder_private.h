@@ -45,8 +45,8 @@ typedef struct _recorder_cb_info_s {
 	gpointer user_cb[MUSE_RECORDER_EVENT_TYPE_NUM];
 	gpointer user_data[MUSE_RECORDER_EVENT_TYPE_NUM];
 	gchar recv_msg[MUSE_RECORDER_MSG_MAX_LENGTH];
-	GCond *api_cond;
-	GMutex *api_mutex;
+	GCond api_cond[MUSE_RECORDER_API_MAX];
+	GMutex api_mutex[MUSE_RECORDER_API_MAX];
 	gint *api_activating;
 	gint *api_ret;
 	tbm_bufmgr bufmgr;
