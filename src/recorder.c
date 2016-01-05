@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <muse_core.h>
 #include <muse_core_msg_json.h>
+#include <muse_core_module.h>
 #include <mm_camcorder_client.h>
 #include <dlog.h>
 
