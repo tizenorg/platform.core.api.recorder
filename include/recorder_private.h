@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-#define RECORDER_PARSE_STRING_SIZE 10
+#define RECORDER_PARSE_STRING_SIZE 20
 
 
 typedef struct _recorder_cb_info_s {
