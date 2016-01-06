@@ -213,8 +213,11 @@ static void _client_user_callback(recorder_cb_info_s *cb_info, char *recv_msg, m
 
 			muse_recorder_msg_get(codec, recv_msg);
 
-			((recorder_supported_audio_encoder_cb)cb_info->user_cb[event])((recorder_audio_codec_e)codec,
-				cb_info->user_data[event]);
+			if (((recorder_supported_audio_encoder_cb)cb_info->user_cb[event])((recorder_audio_codec_e)codec, cb_info->user_data[event]) == false) {
+				cb_info->user_cb[event] = NULL;
+				cb_info->user_data[event] = NULL;
+				LOGD("stop foreach callback for SUPPORTED_AUDIO_ENCODER");
+			}
 			break;
 		}
 	case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_FILE_FORMAT:
@@ -223,8 +226,11 @@ static void _client_user_callback(recorder_cb_info_s *cb_info, char *recv_msg, m
 
 			muse_recorder_msg_get(format, recv_msg);
 
-			((recorder_supported_file_format_cb)cb_info->user_cb[event])((recorder_file_format_e)format,
-				cb_info->user_data[event]);
+			if (((recorder_supported_file_format_cb)cb_info->user_cb[event])((recorder_file_format_e)format, cb_info->user_data[event]) == false) {
+				cb_info->user_cb[event] = NULL;
+				cb_info->user_data[event] = NULL;
+				LOGD("stop foreach callback for SUPPORTED_FILE_FORMAT");
+			}
 			break;
 		}
 	case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_ENCODER:
@@ -233,8 +239,11 @@ static void _client_user_callback(recorder_cb_info_s *cb_info, char *recv_msg, m
 
 			muse_recorder_msg_get(codec, recv_msg);
 
-			((recorder_supported_video_encoder_cb)cb_info->user_cb[event])((recorder_video_codec_e)codec,
-				cb_info->user_data[event]);
+			if (((recorder_supported_video_encoder_cb)cb_info->user_cb[event])((recorder_video_codec_e)codec, cb_info->user_data[event]) == false) {
+				cb_info->user_cb[event] = NULL;
+				cb_info->user_data[event] = NULL;
+				LOGD("stop foreach callback for SUPPORTED_VIDEO_ENCODER");
+			}
 			break;
 		}
 	case MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_RESOLUTION:
@@ -245,8 +254,11 @@ static void _client_user_callback(recorder_cb_info_s *cb_info, char *recv_msg, m
 			muse_recorder_msg_get(width, recv_msg);
 			muse_recorder_msg_get(height, recv_msg);
 
-			((recorder_supported_video_resolution_cb)cb_info->user_cb[event])(width, height,
-				cb_info->user_data[event]);
+			if (((recorder_supported_video_resolution_cb)cb_info->user_cb[event])(width, height, cb_info->user_data[event]) == false) {
+				cb_info->user_cb[event] = NULL;
+				cb_info->user_data[event] = NULL;
+				LOGD("stop foreach callback for SUPPORTED_VIDEO_RESOLUTION");
+			}
 			break;
 		}
 
