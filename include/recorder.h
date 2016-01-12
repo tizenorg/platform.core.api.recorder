@@ -98,6 +98,7 @@ typedef enum {
 	RECORDER_FILE_FORMAT_ADTS,   /**< ADTS file format */
 	RECORDER_FILE_FORMAT_WAV,    /**< WAV file format */
 	RECORDER_FILE_FORMAT_OGG,    /**< OGG file format */
+	RECORDER_FILE_FORMAT_M2TS    /**< MPEG2-TransportStream file format */
 } recorder_file_format_e;
 
 /**
