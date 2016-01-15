@@ -1432,7 +1432,7 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	if (format < RECORDER_FILE_FORMAT_3GP || format > RECORDER_FILE_FORMAT_OGG) {
+	if (format < RECORDER_FILE_FORMAT_3GP || format > RECORDER_FILE_FORMAT_M2TS) {
 		LOGE("invalid format %d", format);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
