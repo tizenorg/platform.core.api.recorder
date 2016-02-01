@@ -17,17 +17,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mm_types.h>
 #include <recorder.h>
+#include <storage.h>
 #include <muse_recorder.h>
 #include <muse_recorder_msg.h>
 #include <muse_core_ipc.h>
+#include <muse_core_module.h>
 #include <recorder_private.h>
 #include <glib.h>
-#include <muse_core.h>
-#include <muse_core_msg_json.h>
-#include <muse_core_module.h>
-#include <mm_camcorder_client.h>
 #include <dlog.h>
 
 #ifdef LOG_TAG
@@ -871,6 +868,54 @@ static void _client_callback_destroy(recorder_cb_info_s *cb_info)
 	return;
 }
 
+static int _recorder_storage_device_supported_cb(int storage_id, storage_type_e type, storage_state_e state, const char *path, void *user_data)
+{
+	char **root_directory = (char **)user_data;
+
+	if (root_directory == NULL) {
+		LOGE("user data is NULL");
+		return FALSE;
+	}
+
+	LOGD("storage id %d, type %d, state %d, path %s",
+		storage_id, type, state, path ? path : "NULL");
+
+	if (type == STORAGE_TYPE_INTERNAL && path) {
+		if (*root_directory) {
+			free(*root_directory);
+			*root_directory = NULL;
+		}
+
+		*root_directory = strdup(path);
+		if (*root_directory) {
+			LOGD("get root directory %s", *root_directory);
+			return FALSE;
+		} else {
+			LOGE("strdup %s failed");
+		}
+	}
+
+	return TRUE;
+}
+
+static int _client_get_root_directory(char **root_directory)
+{
+	int ret = STORAGE_ERROR_NONE;
+
+	if (root_directory == NULL) {
+		LOGE("user data is NULL");
+		return false;
+	}
+
+	ret = storage_foreach_device_supported((storage_device_supported_cb)_recorder_storage_device_supported_cb, root_directory);
+	if (ret != STORAGE_ERROR_NONE) {
+		LOGE("storage_foreach_device_supported failed 0x%x", ret);
+		return false;
+	}
+
+	return true;
+}
+
 static int _recorder_create_common(recorder_h *recorder, muse_recorder_type_e type, camera_h camera)
 {
 	int ret = RECORDER_ERROR_NONE;
@@ -948,8 +993,7 @@ static int _recorder_create_common(recorder_h *recorder, muse_recorder_type_e ty
 			goto _ERR_RECORDER_EXIT;
 		}
 
-		if (mm_camcorder_client_get_root_directory(&root_directory) != MM_ERROR_NONE ||
-		    root_directory == NULL) {
+		if (!_client_get_root_directory(&root_directory) || root_directory == NULL) {
 			LOGE("failed to get root directory of internal storage");
 			ret = RECORDER_ERROR_INVALID_OPERATION;
 			goto _ERR_RECORDER_AFTER_CREATE;

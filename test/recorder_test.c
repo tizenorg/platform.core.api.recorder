@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>
-#include <gst/gst.h>
 #include <sys/time.h>
 #include <camera.h>
 #include <recorder.h>
@@ -49,7 +48,6 @@ GIOChannel *stdin_channel;
 int resolution_set;
 int g_current_state;
 int src_w, src_h;
-GstCaps *filtercaps;
 bool isMultishot;
 int  cam_info;
 int recorder_state;
@@ -101,7 +99,6 @@ void *display;
 
 #define AUDIO_SOURCE_SAMPLERATE_AAC     44100
 #define AUDIO_SOURCE_SAMPLERATE_AMR     8000
-#define AUDIO_SOURCE_FORMAT             MM_CAMCORDER_AUDIO_FORMAT_PCM_S16_LE
 #define AUDIO_SOURCE_CHANNEL_AAC        2
 #define AUDIO_SOURCE_CHANNEL_AMR        1
 #define VIDEO_ENCODE_BITRATE            40000000 /* bps */
@@ -1608,10 +1605,9 @@ int main(int argc, char **argv)
 
 	timer = g_timer_new();
 
-	gst_init(&argc, &argv);
 	elm_init(argc, argv);
 
-	LOGD("gst_init() : %12.6lfs", g_timer_elapsed(timer, NULL));
+	LOGD("elm_init() : %12.6lfs", g_timer_elapsed(timer, NULL));
 
 	hcamcorder = (cam_handle_t *) g_malloc0(sizeof(cam_handle_t));
 

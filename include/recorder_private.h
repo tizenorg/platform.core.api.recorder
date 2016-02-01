@@ -17,9 +17,8 @@
 
 
 #ifndef __TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__
-#define	__TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__
+#define __TIZEN_MULTIMEDIA_RECORDER_PRIVATE_H__
 #include <camera.h>
-#include <mm_camcorder.h>
 #include <recorder.h>
 #include <muse_core.h>
 
@@ -71,7 +70,6 @@ typedef struct _recorder_cli_s {
 
 typedef struct _camera_cli_s {
 	intptr_t remote_handle;
-	MMHandleType client_handle;
 	void *cb_info;
 } camera_cli_s;
 

@@ -1,6 +1,6 @@
 Name:       capi-media-recorder
 Summary:    A Recorder API
-Version:    0.2.19
+Version:    0.2.20
 Release:    0
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -17,7 +17,7 @@ BuildRequires:  pkgconfig(evas)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(capi-media-tool)
 BuildRequires:  pkgconfig(capi-media-audio-io)
-BuildRequires:  pkgconfig(mm-camcorder)
+BuildRequires:  pkgconfig(storage)
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -63,7 +63,7 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/%{name}
 %manifest capi-media-recorder.manifest
 %{_libdir}/libcapi-media-recorder.so.*
 %{_datadir}/license/%{name}
-%{_bindir}/multimedia_recorder_test
+%{_bindir}/*
 
 %files devel
 %{_includedir}/media/recorder.h
