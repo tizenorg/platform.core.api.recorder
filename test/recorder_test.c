@@ -31,6 +31,7 @@
 #include <dlog.h>
 #include <Ecore.h>
 #include <Elementary.h>
+#include <sound_manager.h>
 
 /*-----------------------------------------------------------------------
   |    GLOBAL VARIABLE DEFINITIONS:                                       |
@@ -1396,6 +1397,14 @@ static gboolean init_handle()
 
 	return TRUE;
 }
+
+
+static void _sound_stream_focus_state_changed_cb(sound_stream_info_h stream_info, sound_stream_focus_change_reason_e reason_for_change, const char *additional_info, void *user_data)
+{
+	g_print("focus changed : reason %d\n", reason_for_change);
+	return;
+}
+
 /**
  * This function is to change camcorder mode.
  *
@@ -1515,6 +1524,16 @@ static gboolean mode_change()
 			if (err != RECORDER_ERROR_NONE) {
 				LOGE("audio recorder create failed 0x%x", err);
 				continue;
+			}
+
+			{
+				sound_stream_info_h stream_info = NULL;
+
+				sound_manager_create_stream_information(SOUND_STREAM_TYPE_MEDIA, _sound_stream_focus_state_changed_cb, hcamcorder, &stream_info);
+				if (stream_info) {
+					recorder_set_sound_stream_info(hcamcorder->recorder, stream_info);
+					sound_manager_destroy_stream_information(stream_info);
+				}
 			}
 
 			err = recorder_attr_set_audio_device(hcamcorder->recorder, RECORDER_AUDIO_DEVICE_MIC);

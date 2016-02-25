@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <recorder.h>
+#include <sound_manager.h>
+#include <sound_manager_internal.h>
 #include <storage.h>
 #include <muse_recorder.h>
 #include <muse_recorder_msg.h>
@@ -985,7 +987,7 @@ static int _recorder_create_common(recorder_h *recorder, muse_recorder_type_e ty
 		goto _ERR_RECORDER_EXIT;
 	}
 
-	ret = client_wait_for_cb_return(MUSE_RECORDER_API_CREATE, pc->cb_info, CALLBACK_TIME_OUT);
+	ret = client_wait_for_cb_return(MUSE_RECORDER_API_CREATE, pc->cb_info, RECORDER_CALLBACK_TIME_OUT);
 	if (ret == RECORDER_ERROR_NONE) {
 		muse_recorder_msg_get_pointer(handle, pc->cb_info->recv_msg);
 		if (handle == 0) {
@@ -1530,6 +1532,56 @@ int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format
 		*format = (recorder_file_format_e)get_format;
 	}
 	LOGD("ret : 0x%x", ret);
+	return ret;
+}
+
+
+int recorder_set_sound_stream_info(recorder_h recorder, sound_stream_info_h stream_info)
+{
+	int ret = RECORDER_ERROR_NONE;
+	muse_recorder_api_e api = MUSE_RECORDER_API_SET_SOUND_STREAM_INFO;
+	recorder_cli_s *pc = NULL;
+	bool is_available = false;
+	int sock_fd;
+	int stream_index = 0;
+	char *stream_type = NULL;
+
+	if (recorder == NULL || stream_info == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	pc = (recorder_cli_s *)recorder;
+	if (pc->cb_info == NULL) {
+		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
+	sock_fd = pc->cb_info->fd;
+
+	LOGD("ENTER");
+
+	ret = sound_manager_is_available_stream_information(stream_info, NATIVE_API_RECORDER, &is_available);
+	if (ret != SOUND_MANAGER_ERROR_NONE) {
+		LOGE("stream info verification failed");
+		return RECORDER_ERROR_INVALID_OPERATION;
+	}
+
+	if (is_available == false) {
+		LOGE("stream information is not available");
+		return RECORDER_ERROR_INVALID_OPERATION;
+	}
+
+	ret = sound_manager_get_type_from_stream_information(stream_info, &stream_type);
+	ret |= sound_manager_get_index_from_stream_information(stream_info, &stream_index);
+
+	LOGD("sound manager return [0x%x]", ret);
+
+	if (ret == SOUND_MANAGER_ERROR_NONE)
+		muse_recorder_msg_send2(api, sock_fd, pc->cb_info, ret, STRING, stream_type, INT, stream_index);
+	else
+		ret = RECORDER_ERROR_INVALID_OPERATION;
+
 	return ret;
 }
 

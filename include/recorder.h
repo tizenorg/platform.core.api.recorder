@@ -19,6 +19,7 @@
 #include <tizen.h>
 #include <camera.h>
 #include <audio_io.h>
+#include <sound_manager.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -648,6 +649,26 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
  * @see recorder_foreach_supported_file_format()
  */
 int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format);
+
+
+/**
+ * @brief Sets the recorder's sound manager stream information.
+ * @since_tizen 3.0
+ * @remarks You can set sound stream information including audio routing.
+ *          For more details, please refer to @ref CAPI_MEDIA_SOUND_MANAGER_MODULE
+ * @param[in]	recorder	The handle to the media recorder
+ * @param[in]	stream_info	The sound manager info
+ * @return @c 0 on success, otherwise a negative error value
+ * @retval #RECORDER_ERROR_NONE Successful
+ * @retval #RECORDER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #RECORDER_ERROR_INVALID_STATE Invalid state
+ * @retval #RECORDER_ERROR_INVALID_OPERATION Invalid operation
+ * @pre The recorder state must be #RECORDER_STATE_CREATED or #RECORDER_STATE_READY
+ * @see #sound_stream_info_h
+ * @see sound_manager_create_stream_information()
+ * @see sound_manager_destroy_stream_information()
+ */
+int recorder_set_sound_stream_info(recorder_h recorder, sound_stream_info_h stream_info);
 
 
  /**
