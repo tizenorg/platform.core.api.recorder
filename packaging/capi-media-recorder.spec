@@ -1,6 +1,6 @@
 Name:       capi-media-recorder
 Summary:    A Recorder API
-Version:    0.2.20
+Version:    0.2.21
 Release:    0
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -17,6 +17,7 @@ BuildRequires:  pkgconfig(evas)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(capi-media-tool)
 BuildRequires:  pkgconfig(capi-media-audio-io)
+BuildRequires:  pkgconfig(capi-media-sound-manager)
 BuildRequires:  pkgconfig(storage)
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
