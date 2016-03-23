@@ -308,7 +308,7 @@ IDLE_EVENT_CALLBACK_DONE:
 	g_mutex_unlock(&rec_idle_event->event_mutex);
 	g_mutex_clear(&rec_idle_event->event_mutex);
 
-	free(rec_idle_event);
+	g_free(rec_idle_event);
 	rec_idle_event = NULL;
 
 	return false;
@@ -358,7 +358,7 @@ static void _recorder_remove_idle_event_all(recorder_cb_info_s *cb_info)
 					if (ret == TRUE) {
 						g_mutex_clear(&rec_idle_event->event_mutex);
 
-						free(rec_idle_event);
+						g_free(rec_idle_event);
 						rec_idle_event = NULL;
 
 						LOGD("remove idle event done");
@@ -459,7 +459,7 @@ static void *_recorder_msg_handler_func(gpointer data)
 				_client_user_callback(cb_info, rec_msg->recv_msg, event);
 				break;
 			case MUSE_RECORDER_EVENT_CLASS_THREAD_MAIN:
-				rec_idle_event = (recorder_idle_event_s *)malloc(sizeof(recorder_idle_event_s));
+				rec_idle_event = g_new0(recorder_idle_event_s, 1);
 				if (rec_idle_event == NULL) {
 					LOGE("rec_idle_event alloc failed");
 					break;
@@ -592,8 +592,11 @@ static void *_recorder_msg_recv_func(gpointer data)
 				continue;
 			}
 
-			if (muse_recorder_msg_get(api_class, parse_str[i]))
-				LOGD("recorder api_class[%d]", api_class);
+			if (api != MUSE_RECORDER_CB_EVENT) {
+				LOGD("check api_class");
+				if (muse_recorder_msg_get(api_class, parse_str[i]))
+					LOGD("recorder api_class[%d]", api_class);
+			}
 
 			if (api_class == MUSE_RECORDER_API_CLASS_IMMEDIATE) {
 				g_mutex_lock(&cb_info->api_mutex[api]);
