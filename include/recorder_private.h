@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 #define RECORDER_PARSE_STRING_SIZE 20
+#define RECORDER_MSG_LENGTH_MAX    5120
 
 
 typedef struct _recorder_cb_info_s {
@@ -43,7 +44,7 @@ typedef struct _recorder_cb_info_s {
 	GMutex idle_event_mutex;
 	gpointer user_cb[MUSE_RECORDER_EVENT_TYPE_NUM];
 	gpointer user_data[MUSE_RECORDER_EVENT_TYPE_NUM];
-	gchar recv_msg[MUSE_RECORDER_MSG_MAX_LENGTH];
+	gchar recv_msg[RECORDER_MSG_LENGTH_MAX];
 	GCond api_cond[MUSE_RECORDER_API_MAX];
 	GMutex api_mutex[MUSE_RECORDER_API_MAX];
 	gint *api_activating;
