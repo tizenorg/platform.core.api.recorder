@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <camera_internal.h>
 #include <recorder.h>
 #include <sound_manager.h>
 #include <sound_manager_internal.h>
@@ -971,6 +972,7 @@ static int _recorder_create_common(recorder_h *recorder, muse_recorder_type_e ty
 			MUSE_TYPE_INT, "pid", getpid(),
 			0);
 	} else {
+		pc->camera = camera;
 		camera_handle = (intptr_t)((camera_cli_s *)camera)->remote_handle;
 		send_msg = muse_core_msg_json_factory_new(MUSE_RECORDER_API_CREATE,
 			MUSE_TYPE_INT, "module", MUSE_RECORDER,
@@ -1163,44 +1165,72 @@ int recorder_prepare(recorder_h recorder)
 
 	LOGD("ret : 0x%x", ret);
 
+	if (ret == RECORDER_ERROR_NONE && pc->camera)
+		camera_start_evas_rendering(pc->camera);
+
 	return ret;
 }
 
 
 int recorder_unprepare(recorder_h recorder)
 {
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
 	int ret = RECORDER_ERROR_NONE;
 	muse_recorder_api_e api = MUSE_RECORDER_API_UNPREPARE;
 	recorder_cli_s *pc = (recorder_cli_s *)recorder;
 	int sock_fd;
+	camera_state_e camera_state = CAMERA_STATE_NONE;
+
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
 
 	LOGD("ENTER");
 
+	if (pc->camera) {
+		ret = camera_get_state(pc->camera, &camera_state);
+		if (ret != CAMERA_ERROR_NONE) {
+			LOGE("failed to get camera state 0x%x", ret);
+			return RECORDER_ERROR_INVALID_OPERATION;
+		}
+
+		if (camera_state == CAMERA_STATE_PREVIEW) {
+			ret = camera_stop_evas_rendering(pc->camera, false);
+			if (ret != CAMERA_ERROR_NONE) {
+				LOGE("camera_stop_evas_rendering failed 0x%x", ret);
+				return RECORDER_ERROR_INVALID_OPERATION;
+			}
+		}
+	}
+
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
 
 int recorder_start(recorder_h recorder)
 {
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
 	int ret = RECORDER_ERROR_NONE;
 	muse_recorder_api_e api = MUSE_RECORDER_API_START;
 	recorder_cli_s *pc = (recorder_cli_s *)recorder;
 	int sock_fd;
+	recorder_state_e current_state = RECORDER_STATE_NONE;
+
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -1209,8 +1239,29 @@ int recorder_start(recorder_h recorder)
 
 	LOGD("ENTER");
 
+	if (pc->camera) {
+		ret = recorder_get_state(recorder, &current_state);
+		if (ret != RECORDER_ERROR_NONE) {
+			LOGE("failed to get current state 0x%x", ret);
+			return RECORDER_ERROR_INVALID_OPERATION;
+		}
+
+		if (current_state == RECORDER_STATE_READY) {
+			ret = camera_stop_evas_rendering(pc->camera, true);
+			if (ret != CAMERA_ERROR_NONE) {
+				LOGE("camera_stop_evas_rendering failed 0x%x", ret);
+				return RECORDER_ERROR_INVALID_OPERATION;
+			}
+		}
+	}
+
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+
+	if (pc->camera && current_state == RECORDER_STATE_READY)
+		camera_start_evas_rendering(pc->camera);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
@@ -1241,14 +1292,17 @@ int recorder_pause(recorder_h recorder)
 
 int recorder_commit(recorder_h recorder)
 {
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
 	int ret = RECORDER_ERROR_NONE;
 	muse_recorder_api_e api = MUSE_RECORDER_API_COMMIT;
 	recorder_cli_s *pc = (recorder_cli_s *)recorder;
 	int sock_fd;
+	recorder_state_e current_state = RECORDER_STATE_NONE;
+
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -1257,32 +1311,78 @@ int recorder_commit(recorder_h recorder)
 
 	LOGD("ENTER");
 
+	if (pc->camera) {
+		ret = recorder_get_state(recorder, &current_state);
+		if (ret != RECORDER_ERROR_NONE) {
+			LOGE("failed to get current state 0x%x", ret);
+			return RECORDER_ERROR_INVALID_OPERATION;
+		}
+
+		if (current_state >= RECORDER_STATE_RECORDING) {
+			ret = camera_stop_evas_rendering(pc->camera, true);
+			if (ret != CAMERA_ERROR_NONE) {
+				LOGE("camera_stop_evas_rendering failed 0x%x", ret);
+				return RECORDER_ERROR_INVALID_OPERATION;
+			}
+		}
+	}
+
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+
+	if (pc->camera && current_state >= RECORDER_STATE_RECORDING)
+		camera_start_evas_rendering(pc->camera);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
 
 int recorder_cancel(recorder_h recorder)
 {
-	if (recorder == NULL) {
-		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
 	int ret = RECORDER_ERROR_NONE;
 	muse_recorder_api_e api = MUSE_RECORDER_API_CANCEL;
 	recorder_cli_s *pc = (recorder_cli_s *)recorder;
 	int sock_fd;
+	recorder_state_e current_state = RECORDER_STATE_NONE;
+
+	if (recorder == NULL) {
+		LOGE("NULL pointer handle");
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
 
 	LOGD("ENTER");
 
+	if (pc->camera) {
+		ret = recorder_get_state(recorder, &current_state);
+		if (ret != RECORDER_ERROR_NONE) {
+			LOGE("failed to get current state 0x%x", ret);
+			return RECORDER_ERROR_INVALID_OPERATION;
+		}
+
+		if (current_state >= RECORDER_STATE_RECORDING) {
+			ret = camera_stop_evas_rendering(pc->camera, true);
+			if (ret != CAMERA_ERROR_NONE) {
+				LOGE("camera_stop_evas_rendering failed 0x%x", ret);
+				return RECORDER_ERROR_INVALID_OPERATION;
+			}
+		}
+	}
+
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+
+	if (pc->camera && current_state >= RECORDER_STATE_RECORDING)
+		camera_start_evas_rendering(pc->camera);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
@@ -1470,7 +1570,9 @@ int recorder_get_filename(recorder_h recorder,  char **filename)
 		muse_recorder_msg_get_string(get_filename, pc->cb_info->recv_msg);
 		*filename = strdup(get_filename);
 	}
-	LOGD("ret : 0x%x, filename : %s", ret, *filename);
+
+	LOGD("ret : 0x%x, filename : [%s]", ret, (*filename) ? *filename : "NULL");
+
 	return ret;
 }
 
@@ -2613,10 +2715,6 @@ int recorder_attr_set_audio_channel(recorder_h recorder, int channel_count)
 {
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
-	if (channel_count < 1) {
-		LOGE("invalid channel %d", channel_count);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
 	int ret = RECORDER_ERROR_NONE;

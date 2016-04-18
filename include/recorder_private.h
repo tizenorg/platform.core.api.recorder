@@ -67,6 +67,7 @@ typedef struct _recorder_idle_event_s {
 typedef struct _recorder_cli_s {
 	intptr_t remote_handle;
 	recorder_cb_info_s *cb_info;
+	camera_h camera;
 } recorder_cli_s;
 
 typedef struct _camera_cli_s {
