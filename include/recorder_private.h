@@ -30,6 +30,29 @@ extern "C" {
 #define RECORDER_MSG_LENGTH_MAX    5120
 
 
+enum {
+	_RECORDER_GET_INT_STATE = 0,
+	_RECORDER_GET_INT_VIDEO_RESOLUTION,
+	_RECORDER_GET_INT_FILE_FORMAT,
+	_RECORDER_GET_INT_AUDIO_ENCODER,
+	_RECORDER_GET_INT_VIDEO_ENCODER,
+	_RECORDER_GET_INT_SIZE_LIMIT,
+	_RECORDER_GET_INT_TIME_LIMIT,
+	_RECORDER_GET_INT_AUDIO_DEVICE,
+	_RECORDER_GET_INT_AUDIO_SAMPLERATE,
+	_RECORDER_GET_INT_AUDIO_ENCODER_BITRATE,
+	_RECORDER_GET_INT_VIDEO_ENCODER_BITRATE,
+	_RECORDER_GET_INT_AUDIO_CHANNEL,
+	_RECORDER_GET_INT_ORIENTATION_TAG,
+	_RECORDER_GET_INT_MAX
+};
+
+enum {
+	_RECORDER_GET_DOUBLE_AUDIO_LEVEL = 0,
+	_RECORDER_GET_DOUBLE_RECORDING_MOTION_RATE,
+	_RECORDER_GET_DOUBLE_MAX
+};
+
 typedef struct _recorder_cb_info_s {
 	gint fd;
 	GThread *msg_recv_thread;
@@ -50,6 +73,11 @@ typedef struct _recorder_cb_info_s {
 	gint *api_activating;
 	gint *api_ret;
 	tbm_bufmgr bufmgr;
+
+	/* get values */
+	char *get_filename;
+	gint get_int_value[_RECORDER_GET_INT_MAX];
+	gdouble get_double_value[_RECORDER_GET_DOUBLE_MAX];
 } recorder_cb_info_s;
 
 typedef struct _recorder_message_s {
