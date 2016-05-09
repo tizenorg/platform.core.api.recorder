@@ -611,16 +611,140 @@ static void *_recorder_msg_recv_func(gpointer data)
 				cb_info->api_ret[api] = ret;
 				cb_info->api_activating[api] = 1;
 
-				if (api == MUSE_RECORDER_API_CREATE) {
+				switch (api) {
+				case MUSE_RECORDER_API_CREATE:
 					if (ret != RECORDER_ERROR_NONE) {
 						g_atomic_int_set(&cb_info->msg_recv_running, 0);
 						LOGE("recorder create error 0x%x. close client cb handler", ret);
 					}
-				} else if (api == MUSE_RECORDER_API_DESTROY) {
+					break;
+				case MUSE_RECORDER_API_DESTROY:
 					if (ret == RECORDER_ERROR_NONE) {
 						g_atomic_int_set(&cb_info->msg_recv_running, 0);
 						LOGD("recorder destroy done. close client cb handler");
 					}
+					break;
+				case MUSE_RECORDER_API_GET_STATE:
+					{
+						int get_state = 0;
+						muse_recorder_msg_get(get_state, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_STATE] = get_state;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_VIDEO_RESOLUTION:
+					{
+						int get_width = 0;
+						int get_height = 0;
+						muse_recorder_msg_get(get_width, parse_str[i]);
+						muse_recorder_msg_get(get_height, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_RESOLUTION] = get_width << 16;
+						cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_RESOLUTION] |= get_height;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_FILE_FORMAT:
+					{
+						int get_format = 0;
+						muse_recorder_msg_get(get_format, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_FILE_FORMAT] = get_format;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_AUDIO_ENCODER:
+					{
+						int get_codec = 0;
+						muse_recorder_msg_get(get_codec, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_ENCODER] = get_codec;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_VIDEO_ENCODER:
+					{
+						int get_codec = 0;
+						muse_recorder_msg_get(get_codec, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_ENCODER] = get_codec;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_SIZE_LIMIT:
+					{
+						int get_kbyte = 0;
+						muse_recorder_msg_get(get_kbyte, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_SIZE_LIMIT] = get_kbyte;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_TIME_LIMIT:
+					{
+						int get_second = 0;
+						muse_recorder_msg_get(get_second, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_TIME_LIMIT] = get_second;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_AUDIO_DEVICE:
+					{
+						int get_device = 0;
+						muse_recorder_msg_get(get_device, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_DEVICE] = get_device;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_AUDIO_SAMPLERATE:
+					{
+						int get_samplerate = 0;
+						muse_recorder_msg_get(get_samplerate, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_SAMPLERATE] = get_samplerate;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_AUDIO_ENCODER_BITRATE:
+					{
+						int get_bitrate = 0;
+						muse_recorder_msg_get(get_bitrate, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_ENCODER_BITRATE] = get_bitrate;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_VIDEO_ENCODER_BITRATE:
+					{
+						int get_bitrate = 0;
+						muse_recorder_msg_get(get_bitrate, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_ENCODER_BITRATE] = get_bitrate;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_RECORDING_MOTION_RATE:
+					{
+						double get_rate = 0;
+						muse_recorder_msg_get_double(get_rate, parse_str[i]);
+						cb_info->get_double_value[_RECORDER_GET_DOUBLE_RECORDING_MOTION_RATE] = get_rate;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_AUDIO_CHANNEL:
+					{
+						int get_channel_count = 0;
+						muse_recorder_msg_get(get_channel_count, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_CHANNEL] = get_channel_count;
+					}
+					break;
+				case MUSE_RECORDER_API_ATTR_GET_ORIENTATION_TAG:
+					{
+						int get_orientation = 0;
+						muse_recorder_msg_get(get_orientation, parse_str[i]);
+						cb_info->get_int_value[_RECORDER_GET_INT_ORIENTATION_TAG] = get_orientation;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_AUDIO_LEVEL:
+					{
+						double get_level = 0.0;
+						muse_recorder_msg_get_double(get_level, parse_str[i]);
+						cb_info->get_double_value[_RECORDER_GET_DOUBLE_AUDIO_LEVEL] = get_level;
+					}
+					break;
+				case MUSE_RECORDER_API_GET_FILENAME:
+					{
+						char get_filename[MUSE_RECORDER_MSG_MAX_LENGTH] = {'\0',};
+						muse_recorder_msg_get_string(get_filename, parse_str[i]);
+						if (cb_info->get_filename) {
+							g_free(cb_info->get_filename);
+							cb_info->get_filename = NULL;
+						}
+						cb_info->get_filename = g_strdup(get_filename);
+					}
+					break;
+				default:
+					break;
 				}
 
 				g_cond_signal(&cb_info->api_cond[api]);
@@ -867,6 +991,10 @@ static void _client_callback_destroy(recorder_cb_info_s *cb_info)
 		g_free(cb_info->api_ret);
 		cb_info->api_ret = NULL;
 	}
+	if (cb_info->get_filename) {
+		g_free(cb_info->get_filename);
+		cb_info->get_filename = NULL;
+	}
 
 	g_free(cb_info);
 	cb_info = NULL;
@@ -1072,37 +1200,37 @@ int recorder_create_audiorecorder(recorder_h *recorder)
 
 int recorder_get_state(recorder_h recorder, recorder_state_e *state)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	recorder_cli_s *pc = NULL;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_STATE;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (state == NULL) {
 		LOGE("NULL pointer state");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	int ret = RECORDER_ERROR_NONE;
-
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_STATE;
-	int sock_fd;
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_state;
 
 	LOGD("Enter, remote_handle : %x", pc->remote_handle);
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_state, pc->cb_info->recv_msg);
-		*state = (recorder_state_e)get_state;
-	}
+	if (ret == RECORDER_ERROR_NONE)
+		*state = (recorder_state_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_STATE];
 
-	LOGD("ret : 0x%x, get_state : %d", ret, get_state);
+	LOGD("ret : 0x%x, state : %d", ret, *state);
 
 	return ret;
 }
@@ -1418,36 +1546,40 @@ int recorder_set_video_resolution(recorder_h recorder, int width, int height)
 
 int recorder_get_video_resolution(recorder_h recorder, int *width, int *height)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_VIDEO_RESOLUTION;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (!width || !height) {
 		LOGE("NULL pointer width = [%p], height = [%p]", width, height);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_VIDEO_RESOLUTION;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_width;
-	int get_height;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+
 	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_width, pc->cb_info->recv_msg);
-		muse_recorder_msg_get(get_height, pc->cb_info->recv_msg);
-		*width = get_width;
-		*height = get_height;
+		*width = pc->cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_RESOLUTION] >> 16;
+		*height = (0x0000ffff & pc->cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_RESOLUTION]);
 	}
-	LOGD("ret : 0x%x", ret);
+
+	LOGD("ret : 0x%x, %dx%d", ret, *width, *height);
+
 	return ret;
 }
 
@@ -1483,30 +1615,33 @@ int recorder_foreach_supported_video_resolution(recorder_h recorder,
 
 int recorder_get_audio_level(recorder_h recorder, double *level)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_AUDIO_LEVEL;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL || level == NULL) {
 		LOGE("NULL pointer %p %p", recorder, level);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_AUDIO_LEVEL;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	double get_level;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get_double(get_level, pc->cb_info->recv_msg);
-		*level = get_level;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*level = pc->cb_info->get_double_value[_RECORDER_GET_DOUBLE_AUDIO_LEVEL];
+
+	LOGD("ret : 0x%x, level %lf", ret, *level);
+
 	return ret;
 }
 
@@ -1542,6 +1677,11 @@ int recorder_set_filename(recorder_h recorder,  const char *filename)
 
 int recorder_get_filename(recorder_h recorder,  char **filename)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_FILENAME;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("handle is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
@@ -1551,25 +1691,21 @@ int recorder_get_filename(recorder_h recorder,  char **filename)
 		LOGE("filename is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_FILENAME;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	char get_filename[MUSE_RECORDER_MSG_MAX_LENGTH] = {0,};
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get_string(get_filename, pc->cb_info->recv_msg);
-		*filename = strdup(get_filename);
-	}
+	if (ret == RECORDER_ERROR_NONE)
+		*filename = pc->cb_info->get_filename;
 
 	LOGD("ret : 0x%x, filename : [%s]", ret, (*filename) ? *filename : "NULL");
 
@@ -1608,35 +1744,38 @@ int recorder_set_file_format(recorder_h recorder, recorder_file_format_e format)
 
 int recorder_get_file_format(recorder_h recorder, recorder_file_format_e *format)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_FILE_FORMAT;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (format == NULL) {
 		LOGE("NULL pointer data");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_FILE_FORMAT;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_format;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
 
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_format, pc->cb_info->recv_msg);
-		LOGD("get_fileformat : %d", get_format);
-		*format = (recorder_file_format_e)get_format;
-	}
-	LOGD("ret : 0x%x", ret);
+	if (ret == RECORDER_ERROR_NONE)
+		*format = (recorder_file_format_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_FILE_FORMAT];
+
+	LOGD("ret : 0x%x, format %d", ret, *format);
+
 	return ret;
 }
 
@@ -2152,33 +2291,38 @@ int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e codec
 
 int recorder_get_audio_encoder(recorder_h recorder, recorder_audio_codec_e *codec)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_AUDIO_ENCODER;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (codec == NULL) {
 		LOGE("codec is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_AUDIO_ENCODER;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_codec;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_codec, pc->cb_info->recv_msg);
-		*codec = (recorder_audio_codec_e)get_codec;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*codec = (recorder_audio_codec_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_ENCODER];
+
+	LOGD("ret : 0x%x, codec %d", ret, *codec);
+
 	return ret;
 }
 
@@ -2218,33 +2362,38 @@ int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e codec
 
 int recorder_get_video_encoder(recorder_h recorder, recorder_video_codec_e *codec)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_GET_VIDEO_ENCODER;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (codec == NULL) {
 		LOGE("codec is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_GET_VIDEO_ENCODER;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_codec;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_codec, pc->cb_info->recv_msg);
-		*codec = (recorder_audio_codec_e)get_codec;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*codec = (recorder_audio_codec_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_ENCODER];
+
+	LOGD("ret : 0x%x, codec %d", ret, *codec);
+
 	return ret;
 }
 
@@ -2344,199 +2493,228 @@ int recorder_attr_set_video_encoder_bitrate(recorder_h recorder, int bitrate)
 
 int recorder_attr_get_size_limit(recorder_h recorder, int *kbyte)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_SIZE_LIMIT;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (kbyte == NULL) {
 		LOGE("NULL pointer kbyte");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_SIZE_LIMIT;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_kbyte;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_kbyte, pc->cb_info->recv_msg);
-		*kbyte = get_kbyte;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*kbyte = pc->cb_info->get_int_value[_RECORDER_GET_INT_SIZE_LIMIT];
+
+	LOGD("ret : 0x%x, %d kbyte", ret, *kbyte);
+
 	return ret;
 }
 
 
 int recorder_attr_get_time_limit(recorder_h recorder, int *second)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_TIME_LIMIT;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (second == NULL) {
 		LOGE("NULL pointer second");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_TIME_LIMIT;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_second;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_second, pc->cb_info->recv_msg);
-		*second = get_second;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*second = pc->cb_info->get_int_value[_RECORDER_GET_INT_TIME_LIMIT];
+
+	LOGD("ret : 0x%x, %d second", ret, *second);
+
 	return ret;
 }
 
 
 int recorder_attr_get_audio_device(recorder_h recorder, recorder_audio_device_e *device)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_DEVICE;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (device == NULL) {
 		LOGE("NULL pointer device");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_DEVICE;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_device;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_device, pc->cb_info->recv_msg);
-		*device = (recorder_audio_device_e)get_device;
-	}
 
-	LOGD("ret : 0x%x", ret);
+	if (ret == RECORDER_ERROR_NONE)
+		*device = (recorder_audio_device_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_DEVICE];
+
+	LOGD("ret : 0x%x, device %d", ret, *device);
+
 	return ret;
 }
 
 
 int recorder_attr_get_audio_samplerate(recorder_h recorder, int *samplerate)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_SAMPLERATE;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (samplerate == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_SAMPLERATE;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_samplerate;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_samplerate, pc->cb_info->recv_msg);
-		*samplerate = get_samplerate;
-	}
-	LOGD("ret : 0x%x, get_samplerate : %d", ret, get_samplerate);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*samplerate = pc->cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_SAMPLERATE];
+
+	LOGD("ret : 0x%x, samplerate %d", ret, *samplerate);
+
 	return ret;
 }
 
 
 int recorder_attr_get_audio_encoder_bitrate(recorder_h recorder, int *bitrate)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_ENCODER_BITRATE;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (bitrate == NULL) {
 		LOGE("NULL pointer");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_ENCODER_BITRATE;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_bitrate;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_bitrate, pc->cb_info->recv_msg);
-		*bitrate = get_bitrate;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*bitrate = pc->cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_ENCODER_BITRATE];
+
+	LOGD("ret : 0x%x, bitrate %d", ret, *bitrate);
+
 	return ret;
 }
 
 
 int recorder_attr_get_video_encoder_bitrate(recorder_h recorder, int *bitrate)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_VIDEO_ENCODER_BITRATE;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (bitrate == NULL) {
 		LOGE("NULL pointer");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_VIDEO_ENCODER_BITRATE;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_bitrate;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_bitrate, pc->cb_info->recv_msg);
-		*bitrate = get_bitrate;
-	}
+
+	if (ret == RECORDER_ERROR_NONE)
+		*bitrate = pc->cb_info->get_int_value[_RECORDER_GET_INT_VIDEO_ENCODER_BITRATE];
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
@@ -2680,33 +2858,37 @@ int recorder_attr_set_recording_motion_rate(recorder_h recorder, double rate)
 
 int recorder_attr_get_recording_motion_rate(recorder_h recorder, double *rate)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_RECORDING_MOTION_RATE;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (rate == NULL) {
 		LOGE("rate is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_RECORDING_MOTION_RATE;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	double get_rate;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get_double(get_rate, pc->cb_info->recv_msg);
-		*rate = get_rate;
-	}
-	LOGD("ret : 0x%x - rate %.20lf", ret, *rate);
+	if (ret == RECORDER_ERROR_NONE)
+		*rate = pc->cb_info->get_double_value[_RECORDER_GET_DOUBLE_RECORDING_MOTION_RATE];
+
+	LOGD("ret : 0x%x - rate %lf", ret, *rate);
+
 	return ret;
 }
 
@@ -2741,33 +2923,38 @@ int recorder_attr_set_audio_channel(recorder_h recorder, int channel_count)
 
 int recorder_attr_get_audio_channel(recorder_h recorder, int *channel_count)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_CHANNEL;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (channel_count == NULL) {
 		LOGE("channel_count is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_AUDIO_CHANNEL;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_channel_count;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_channel_count, pc->cb_info->recv_msg);
-		*channel_count = get_channel_count;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*channel_count = pc->cb_info->get_int_value[_RECORDER_GET_INT_AUDIO_CHANNEL];
+
+	LOGD("ret : 0x%x, channel count %d", ret, *channel_count);
+
 	return ret;
 }
 
@@ -2807,32 +2994,37 @@ int recorder_attr_set_orientation_tag(recorder_h recorder, recorder_rotation_e o
 
 int  recorder_attr_get_orientation_tag(recorder_h recorder, recorder_rotation_e *orientation)
 {
+	int ret = RECORDER_ERROR_NONE;
+	int sock_fd = 0;
+	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_ORIENTATION_TAG;
+	recorder_cli_s *pc = NULL;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	if (orientation == NULL) {
 		LOGE("orientation is NULL");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_ATTR_GET_ORIENTATION_TAG;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
+
 	sock_fd = pc->cb_info->fd;
-	int get_orientation;
 
 	LOGD("ENTER");
 
 	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
-	if (ret == RECORDER_ERROR_NONE) {
-		muse_recorder_msg_get(get_orientation, pc->cb_info->recv_msg);
-		*orientation = (recorder_rotation_e)get_orientation;
-	}
-	LOGD("ret : 0x%x", ret);
+
+	if (ret == RECORDER_ERROR_NONE)
+		*orientation = (recorder_rotation_e)pc->cb_info->get_int_value[_RECORDER_GET_INT_ORIENTATION_TAG];
+
+	LOGD("ret : 0x%x, orientation %d", ret, *orientation);
+
 	return ret;
 }
