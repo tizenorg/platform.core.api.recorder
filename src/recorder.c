@@ -2259,34 +2259,30 @@ int recorder_attr_set_audio_device(recorder_h recorder, recorder_audio_device_e 
 
 int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e codec)
 {
+	int ret = RECORDER_ERROR_NONE;
+	muse_recorder_api_e api = MUSE_RECORDER_API_SET_AUDIO_ENCODER;
+	recorder_cli_s *pc = NULL;
+	int sock_fd = 0;
+	int set_codec = (int)codec;
+
 	if (recorder == NULL) {
 		LOGE("NULL pointer handle");
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	if (codec != RECORDER_AUDIO_CODEC_DISABLE &&
-	    (codec < RECORDER_AUDIO_CODEC_AMR || codec > RECORDER_AUDIO_CODEC_PCM)) {
-		LOGE("invalid parameter : codec %d", codec);
-		return RECORDER_ERROR_INVALID_PARAMETER;
-	}
-	int ret = RECORDER_ERROR_NONE;
-	muse_recorder_api_e api = MUSE_RECORDER_API_SET_AUDIO_ENCODER;
-	recorder_cli_s *pc = (recorder_cli_s *)recorder;
-	int sock_fd;
+
+	pc = (recorder_cli_s *)recorder;
 	if (pc->cb_info == NULL) {
 		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
-	sock_fd = pc->cb_info->fd;
-	int set_codec = (int)codec;
 
 	LOGD("ENTER");
 
-	muse_recorder_msg_send1(api,
-							sock_fd,
-							pc->cb_info,
-							ret,
-							INT, set_codec);
+	sock_fd = pc->cb_info->fd;
+	muse_recorder_msg_send1(api, sock_fd, pc->cb_info, ret, INT, set_codec);
+
 	LOGD("ret : 0x%x", ret);
+
 	return ret;
 }
 
