@@ -111,7 +111,8 @@ typedef enum {
 	RECORDER_AUDIO_CODEC_AMR = 0,      /**< AMR codec */
 	RECORDER_AUDIO_CODEC_AAC,          /**< AAC codec */
 	RECORDER_AUDIO_CODEC_VORBIS,       /**< Vorbis codec */
-	RECORDER_AUDIO_CODEC_PCM           /**< PCM codec */
+	RECORDER_AUDIO_CODEC_PCM,          /**< PCM codec */
+	RECORDER_AUDIO_CODEC_MP3           /**< MP3 codec */
 } recorder_audio_codec_e;
 
 /**
