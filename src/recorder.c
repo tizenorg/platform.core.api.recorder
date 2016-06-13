@@ -408,9 +408,9 @@ static void *_recorder_msg_handler_func(gpointer data)
 
 	while (g_atomic_int_get(&cb_info->msg_handler_running)) {
 		if (g_queue_is_empty(cb_info->msg_queue)) {
-			LOGD("signal wait...");
+			/*LOGD("signal wait...");*/
 			g_cond_wait(&cb_info->msg_handler_cond, &cb_info->msg_handler_mutex);
-			LOGD("signal received");
+			/*LOGD("signal received");*/
 
 			if (g_atomic_int_get(&cb_info->msg_handler_running) == 0) {
 				LOGD("stop event thread");
@@ -432,7 +432,7 @@ static void *_recorder_msg_handler_func(gpointer data)
 				cb_info->api_ret[api] = ret;
 				cb_info->api_activating[api] = 1;
 
-				LOGD("recorder api %d - return 0x%x", ret);
+				/*LOGD("recorder api %d - return 0x%x", ret);*/
 
 				g_cond_signal(&cb_info->api_cond[api]);
 			} else {
@@ -471,7 +471,7 @@ static void *_recorder_msg_handler_func(gpointer data)
 				g_mutex_init(&rec_idle_event->event_mutex);
 				memcpy(rec_idle_event->recv_msg, rec_msg->recv_msg, sizeof(rec_idle_event->recv_msg));
 
-				LOGD("add recorder event[%d, %p] to IDLE", event, rec_idle_event);
+				/*LOGD("add recorder event[%d, %p] to IDLE", event, rec_idle_event);*/
 
 				g_mutex_lock(&cb_info->idle_event_mutex);
 				cb_info->idle_event_list = g_list_append(cb_info->idle_event_list, (gpointer)rec_idle_event);
@@ -570,7 +570,7 @@ static void *_recorder_msg_recv_func(gpointer data)
 			if (recv_msg[str_pos] == '}') {
 				memset(parse_str[num_token], 0x0, sizeof(char) * MUSE_RECORDER_MSG_MAX_LENGTH);
 				strncpy(parse_str[num_token], recv_msg + prev_pos, str_pos - prev_pos + 1);
-				LOGD("splitted msg : [%s], Index : %d", parse_str[num_token], num_token);
+				/*LOGD("splitted msg : [%s], Index : %d", parse_str[num_token], num_token);*/
 				prev_pos = str_pos+1;
 				num_token++;
 			}
@@ -594,12 +594,18 @@ static void *_recorder_msg_recv_func(gpointer data)
 			}
 
 			if (api != MUSE_RECORDER_CB_EVENT) {
-				LOGD("check api_class");
-				if (muse_recorder_msg_get(api_class, parse_str[i]))
-					LOGD("recorder api_class[%d]", api_class);
+				if (!muse_recorder_msg_get(api_class, parse_str[i])) {
+					LOGE("failed to get recorder api_class");
+					continue;
+				}
 			}
 
 			if (api_class == MUSE_RECORDER_API_CLASS_IMMEDIATE) {
+				if (api >= MUSE_RECORDER_API_MAX) {
+					LOGE("invalid api %d", api);
+					continue;
+				}
+
 				g_mutex_lock(&cb_info->api_mutex[api]);
 
 				if (!muse_recorder_msg_get(ret, parse_str[i])) {
@@ -760,7 +766,7 @@ static void *_recorder_msg_recv_func(gpointer data)
 				rec_msg->api = api;
 				memcpy(rec_msg->recv_msg, parse_str[i], sizeof(rec_msg->recv_msg));
 
-				LOGD("add recorder message to queue : api %d", api);
+				/*LOGD("add recorder message to queue : api %d", api);*/
 
 				g_mutex_lock(&cb_info->msg_handler_mutex);
 				g_queue_push_tail(cb_info->msg_queue, (gpointer)rec_msg);
@@ -909,7 +915,7 @@ static int client_wait_for_cb_return(muse_recorder_api_e api, recorder_cb_info_s
 	int ret = RECORDER_ERROR_NONE;
 	gint64 end_time;
 
-	LOGD("Enter api : %d", api);
+	/*LOGD("Enter api : %d", api);*/
 
 	g_mutex_lock(&(cb_info->api_mutex[api]));
 
@@ -919,7 +925,7 @@ static int client_wait_for_cb_return(muse_recorder_api_e api, recorder_cb_info_s
 			ret = cb_info->api_ret[api];
 			cb_info->api_activating[api] = 0;
 
-			LOGD("return value : 0x%x", ret);
+			/*LOGD("return value : 0x%x", ret);*/
 		} else {
 			ret = RECORDER_ERROR_INVALID_OPERATION;
 
@@ -929,7 +935,7 @@ static int client_wait_for_cb_return(muse_recorder_api_e api, recorder_cb_info_s
 		ret = cb_info->api_ret[api];
 		cb_info->api_activating[api] = 0;
 
-		LOGD("condition is already checked for the api[%d], return[0x%x]", api, ret);
+		/*LOGD("condition is already checked for the api[%d], return[0x%x]", api, ret);*/
 	}
 
 	g_mutex_unlock(&(cb_info->api_mutex[api]));
