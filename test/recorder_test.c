@@ -176,26 +176,10 @@ typedef struct _cam_xypair {
 } cam_xypair_t;
 
 typedef struct {
-	int expected_width;
-	int expected_height;
-	int ispass;
-} preview_test_data;
-
-typedef struct {
 	int width[100];
 	int height[100];
 	int count;
 } resolution_stack;
-
-typedef struct {
-	camera_attr_af_mode_e mode;
-	int count;
-} af_stack;
-
-typedef struct {
-	int expected_mode;
-	int ispass;
-} af_test_data;
 
 typedef struct {
 	camera_attr_exposure_mode_e mode;
@@ -842,19 +826,19 @@ static void setting_menu(gchar buf)
 			g_print("*Select the preview resolution!\n");
 			resolution_stack resolution_list;
 			resolution_list.count = 0;
-			recorder_foreach_supported_video_resolution(hcamcorder->recorder, preview_resolution_cb, &resolution_list);
+
+			recorder_foreach_supported_video_resolution(hcamcorder->recorder,
+				preview_resolution_cb, &resolution_list);
+
 			flush_stdin();
 			err = scanf("%d", &idx);
 			int result = 0;
-			preview_test_data data;
-			data.ispass = false;
 			if (resolution_list.count > idx && idx >= 0) {
+				printf("-----------------PREVIEW RESOLUTION (%dx%d)---------------------\n",
+					resolution_list.width[idx], resolution_list.height[idx]);
 
-				data.expected_width = resolution_list.width[idx];
-				data.expected_height = resolution_list.height[idx];
-
-				printf("-----------------PREVIEW RESOLUTION (%dx%d)---------------------\n", data.expected_width, data.expected_height);
-				result = recorder_set_video_resolution(hcamcorder->recorder, data.expected_width, data.expected_height);
+				result = recorder_set_video_resolution(hcamcorder->recorder,
+					resolution_list.width[idx], resolution_list.height[idx]);
 			} else {
 				printf("invalid input %d\n", idx);
 				result = -1;
@@ -908,23 +892,19 @@ static void setting_menu(gchar buf)
 		case '4': /* Setting > AF scan range */
 			g_print("*AF scan range !\n");
 
-			af_stack af_mode_list;
-			af_mode_list.count = 0;
-			camera_attr_foreach_supported_af_mode(hcamcorder->camera, (camera_attr_supported_af_mode_cb)af_mode_foreach_cb , NULL);
+			camera_attr_foreach_supported_af_mode(hcamcorder->camera,
+				(camera_attr_supported_af_mode_cb)af_mode_foreach_cb, NULL);
 
-			af_test_data data1;
-			data1.ispass = false;
-			data1.expected_mode = af_mode_list.mode;
 			flush_stdin();
 			err = scanf("%d", &idx);
-
 			bret = camera_attr_set_af_mode(hcamcorder->camera, idx);
 			break;
 
 		case '5': /* Setting > Exposure mode */
 			g_print("* Exposure mode!\n");
 
-			camera_attr_foreach_supported_exposure_mode(hcamcorder->camera, (camera_attr_supported_exposure_mode_cb)exposure_mode_cb, NULL);
+			camera_attr_foreach_supported_exposure_mode(hcamcorder->camera,
+				(camera_attr_supported_exposure_mode_cb)exposure_mode_cb, NULL);
 
 			flush_stdin();
 
