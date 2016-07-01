@@ -2282,7 +2282,7 @@ int recorder_set_audio_encoder(recorder_h recorder, recorder_audio_codec_e codec
 		return RECORDER_ERROR_INVALID_PARAMETER;
 	}
 
-	LOGD("ENTER");
+	LOGD("ENTER audio_encoder %d", codec);
 
 	sock_fd = pc->cb_info->fd;
 	muse_recorder_msg_send1(api, sock_fd, pc->cb_info, ret, INT, set_codec);
@@ -2352,7 +2352,7 @@ int recorder_set_video_encoder(recorder_h recorder, recorder_video_codec_e codec
 	sock_fd = pc->cb_info->fd;
 	int set_codec = (int)codec;
 
-	LOGD("ENTER");
+	LOGD("ENTER video_encoder %d", codec);
 
 	muse_recorder_msg_send1(api,
 							sock_fd,
@@ -2750,6 +2750,32 @@ int recorder_foreach_supported_audio_encoder(recorder_h recorder, recorder_suppo
 	return ret;
 }
 
+int recorder_foreach_supported_audio_encoder_by_file_format(recorder_h recorder, recorder_supported_audio_encoder_cb foreach_cb, recorder_file_format_e format, void *user_data)
+{
+	if (recorder == NULL || foreach_cb == NULL) {
+		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+	int ret = RECORDER_ERROR_NONE;
+
+	recorder_cli_s *pc = (recorder_cli_s *)recorder;
+	muse_recorder_api_e api = MUSE_RECORDER_API_FOREACH_SUPPORTED_AUDIO_ENCODER_BY_FILE_FORMAT;
+
+	LOGD("Enter, handle :%x", pc->remote_handle);
+
+	int sock_fd;
+	if (pc->cb_info == NULL) {
+		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+	sock_fd = pc->cb_info->fd;
+	pc->cb_info->user_cb[MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_AUDIO_ENCODER] = foreach_cb;
+	pc->cb_info->user_data[MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_AUDIO_ENCODER] = user_data;
+
+	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+	LOGD("ret : 0x%x", ret);
+	return ret;
+}
 
 int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_supported_video_encoder_cb foreach_cb, void *user_data)
 {
@@ -2778,6 +2804,32 @@ int recorder_foreach_supported_video_encoder(recorder_h recorder, recorder_suppo
 	return ret;
 }
 
+int recorder_foreach_supported_video_encoder_by_file_format(recorder_h recorder, recorder_supported_video_encoder_cb foreach_cb, recorder_file_format_e format, void *user_data)
+{
+	if (recorder == NULL || foreach_cb == NULL) {
+		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+	int ret = RECORDER_ERROR_NONE;
+
+	recorder_cli_s *pc = (recorder_cli_s *)recorder;
+	muse_recorder_api_e api = MUSE_RECORDER_API_FOREACH_SUPPORTED_VIDEO_ENCODER_BY_FILE_FORMAT;
+
+	LOGD("Enter, handle :%x", pc->remote_handle);
+
+	int sock_fd;
+	if (pc->cb_info == NULL) {
+		LOGE("INVALID_PARAMETER(0x%08x)", RECORDER_ERROR_INVALID_PARAMETER);
+		return RECORDER_ERROR_INVALID_PARAMETER;
+	}
+	sock_fd = pc->cb_info->fd;
+	pc->cb_info->user_cb[MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_ENCODER] = foreach_cb;
+	pc->cb_info->user_data[MUSE_RECORDER_EVENT_TYPE_FOREACH_SUPPORTED_VIDEO_ENCODER] = user_data;
+
+	muse_recorder_msg_send(api, sock_fd, pc->cb_info, ret);
+	LOGD("ret : 0x%x", ret);
+	return ret;
+}
 
 int recorder_attr_set_mute(recorder_h recorder, bool enable)
 {
