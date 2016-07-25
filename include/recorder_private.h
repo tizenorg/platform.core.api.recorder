@@ -28,7 +28,13 @@ extern "C" {
 
 #define RECORDER_PARSE_STRING_SIZE 30
 #define RECORDER_MSG_LENGTH_MAX    5120
+#define RECORDER_CB_TIMEOUT        5
 
+#define RECORDER_MSG_PARAM_SET(param, msg_type, set_value) { \
+	param.type = MUSE_TYPE_##msg_type; \
+	param.name = #set_value; \
+	param.value.value_##msg_type = set_value; \
+}
 
 enum {
 	_RECORDER_GET_INT_STATE = 0,
@@ -97,6 +103,16 @@ typedef struct _recorder_cli_s {
 	recorder_cb_info_s *cb_info;
 	camera_h camera;
 } recorder_cli_s;
+
+typedef struct _recorder_msg_param {
+	int type;
+	const char *name;
+	union {
+		int value_INT;
+		double value_DOUBLE;
+		const char *value_STRING;
+	} value;
+} recorder_msg_param;
 
 typedef struct _camera_cli_s {
 	intptr_t remote_handle;
